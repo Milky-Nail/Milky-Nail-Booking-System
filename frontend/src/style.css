@@ -1,0 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap");
+@import "tailwindcss";
+@theme {
+  --color-primary: #e8306e;
+  --color-secondary: #f7ebef;
+  --font-noto: "Noto Sans TC", sans-serif;
+}
+@layer base {
+  html {
+    font-family: var(--font-noto);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
