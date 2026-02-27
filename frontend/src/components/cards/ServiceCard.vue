@@ -15,7 +15,7 @@
         <img
           :src="service.image"
           alt="示意圖"
-          class="object-cover transition-all duration-1000 ease-out hover:scale-105"
+          class="w-full aspect-4/3 object-cover transition-all duration-1000 ease-out hover:scale-105"
         />
       </div>
       <p class="mt-4 font-serif text-md">
