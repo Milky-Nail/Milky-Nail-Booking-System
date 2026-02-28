@@ -33,5 +33,5 @@
   </section>
 </template>
 <script setup lang="ts">
-import GalleryCard from "../cards/GalleryCard.vue";
+import GalleryCard from "../../common/cards/GalleryCard.vue";
 </script>
