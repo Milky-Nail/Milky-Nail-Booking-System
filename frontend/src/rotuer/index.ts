@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
 import ServiceAndFee from "../views/ServiceAndFee.vue";
 import Gallery from "../views/Gallery.vue";
-import Booking from "../views/Booking.vue";
+import Booking from "../views/appointment.vue";
 import Notice from "../views/Notice.vue";
 import About from "../views/About.vue";
 

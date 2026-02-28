@@ -31,7 +31,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import BaseButton from "../ui/BaseButton.vue";
+import BaseButton from "../../ui/BaseButton.vue";
 import { computed } from "vue";
 
 // 之後需要搬到後端

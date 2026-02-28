@@ -30,5 +30,5 @@
   </section>
 </template>
 <script setup lang="ts">
-import ServiceCard from "../cards/ServiceCard.vue";
+import ServiceCard from "../../common/cards/ServiceCard.vue";
 </script>
