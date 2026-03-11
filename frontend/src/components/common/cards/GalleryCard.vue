@@ -36,7 +36,7 @@ const gallery = [
     image:
       "https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772124607/woman-receiving-manicure-from-woman-gloves-mask-beauty-salon-daytime_oqw27a.jpg",
     duration: "1小時",
-    path: "/service/hand-nail",
+    path: "/home",
   },
   {
     id: 2,
@@ -45,7 +45,7 @@ const gallery = [
     image:
       "https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772118591/copy_of_573982087_122109959337048436_5497158202943003421_n_fnxnhd_0bd7c8.jpg",
     duration: "1.5小時",
-    path: "/service/foot-care",
+    path: "/home",
   },
   {
     id: 3,
@@ -54,7 +54,7 @@ const gallery = [
     image:
       "https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772124541/close-up-client-manicure-appointment_gtcswk.jpg",
     duration: "2小時",
-    path: "/service/eyelash",
+    path: "/home",
   },
   {
     id: 4,
@@ -63,7 +63,7 @@ const gallery = [
     image:
       "https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772118591/copy_of_573982087_122109959337048436_5497158202943003421_n_fnxnhd_0bd7c8.jpg",
     duration: "2小時",
-    path: "/service/eyelash",
+    path: "/home",
   },
   {
     id: 5,
@@ -72,7 +72,7 @@ const gallery = [
     image:
       "https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772124607/woman-receiving-manicure-from-woman-gloves-mask-beauty-salon-daytime_oqw27a.jpg",
     duration: "2小時",
-    path: "/service/eyelash",
+    path: "/home",
   },
   {
     id: 6,
@@ -81,7 +81,7 @@ const gallery = [
     image:
       "https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772124607/woman-receiving-manicure-from-woman-gloves-mask-beauty-salon-daytime_oqw27a.jpg",
     duration: "2小時",
-    path: "/service/eyelash",
+    path: "/home",
   },
 ];
 

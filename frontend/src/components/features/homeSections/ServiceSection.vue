@@ -16,7 +16,34 @@
         為你打造持久又美麗的指尖風格。
       </p>
     </div>
-    <ServiceCard></ServiceCard>
+    <div class="mt-10 flex flex-col lg:flex-row justify-around">
+      <ServiceCard v-for="service in randomServices" :key="service.id">
+        <template #header>
+          <span class="font-serif text-xl font-bold">
+            {{ service.name }}
+          </span>
+        </template>
+
+        <template #image>
+          <RouterLink :to="service.path">
+            <img
+              :src="service.icon_url"
+              alt="示意圖"
+              class="w-full aspect-4/3 object-cover transition-all duration-1000 ease-out hover:scale-105"
+            />
+          </RouterLink>
+        </template>
+        {{ service.description }}
+        <template #footer>
+          <div class="flex justify-between items-center">
+            <p class="font-serif text-sm">
+              所需時間：約 {{ service.duration_minutes }} 分鐘
+            </p>
+            <BaseButton :to="service.path"> {{ serviceCardButton }}</BaseButton>
+          </div>
+        </template>
+      </ServiceCard>
+    </div>
     <div class="flex justify-center mt-5 pb-5">
       <RouterLink
         to="/service-and-fee"
@@ -31,4 +58,24 @@
 </template>
 <script setup lang="ts">
 import ServiceCard from "../../common/cards/ServiceCard.vue";
+import BaseButton from "../../ui/BaseButton.vue";
+import { computed, onMounted, ref } from "vue";
+import { getService, type ServiceCategory } from "../../../api/service";
+
+const services = ref<ServiceCategory[]>([]);
+const loading = ref(true);
+const serviceCardButton = ref("詳細項目");
+
+onMounted(async () => {
+  try {
+    const data = await getService();
+    services.value = data;
+  } finally {
+    loading.value = false;
+  }
+});
+
+const randomServices = computed(() => {
+  return [...services.value].sort(() => Math.random() - 0.5).slice(0, 3);
+});
 </script>

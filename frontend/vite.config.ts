@@ -6,6 +6,8 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
   server: {
+    allowedHosts: ["fourpenny-nonirrigable-jeanette.ngrok-free.dev"],
+    host: true,
     proxy: {
       "/api": {
         target: "http://localhost:3000",
