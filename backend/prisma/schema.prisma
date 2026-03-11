@@ -1,14 +1,283 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model appointment_addons {
+  id                BigInt          @id @default(autoincrement())
+  appointment_id    BigInt?
+  addon_id          Int?
+  price_snapshot    Int
+  duration_snapshot Int             @default(0)
+  service_addons    service_addons? @relation(fields: [addon_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  appointments      appointments?   @relation(fields: [appointment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model appointment_items {
+  id                BigInt          @id @default(autoincrement())
+  appointment_id    BigInt?
+  service_id        Int?
+  price_snapshot    Int
+  duration_snapshot Int
+  service_price_id  Int?
+  appointments      appointments?   @relation(fields: [appointment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  services          services?       @relation(fields: [service_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  service_price     service_prices? @relation(fields: [service_price_id], references: [id])
+}
+
+model appointments {
+  id                 BigInt               @id @default(autoincrement())
+  user_id            BigInt?
+  staff_id           BigInt?
+  start_time         DateTime             @db.Timestamptz(6)
+  end_time           DateTime             @db.Timestamptz(6)
+  total_price        Int                  @default(0)
+  status             appointment_status?  @default(pending)
+  note               String?
+  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  appointment_addons appointment_addons[]
+  appointment_items  appointment_items[]
+  staff              staff?               @relation(fields: [staff_id], references: [id], onUpdate: NoAction)
+  users              users?               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  quote_requests     quote_requests[]
+  reviews            reviews?
+
+  @@index([start_time, end_time], map: "idx_appointments_time_range")
+  @@index([user_id], map: "idx_appointments_user")
+}
+
+model blocked_users {
+  id         Int       @id @default(autoincrement())
+  user_id    BigInt?
+  reason     String?
+  blocked_at DateTime? @default(now()) @db.Timestamptz(6)
+  blocked_by BigInt?
+  staff      staff?    @relation(fields: [blocked_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users      users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model notifications {
+  id      BigInt    @id @default(autoincrement())
+  user_id BigInt?
+  type    String?   @db.VarChar(50)
+  channel String?   @db.VarChar(20)
+  status  String?   @db.VarChar(20)
+  content String?
+  sent_at DateTime? @db.Timestamptz(6)
+  users   users?    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model portfolio_saves {
+  id               BigInt            @id @default(autoincrement())
+  user_id          BigInt?
+  portfolio_id     BigInt?
+  saved_at         DateTime?         @default(now()) @db.Timestamptz(6)
+  staff_portfolios staff_portfolios? @relation(fields: [portfolio_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users            users?            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, portfolio_id])
+  @@index([user_id], map: "idx_portfolio_saves_user")
+}
+
+model quote_requests {
+  id               BigInt            @id @default(autoincrement())
+  user_id          BigInt?
+  staff_id         BigInt?
+  portfolio_id     BigInt?
+  image_url        String?
+  description      String?
+  status           quote_status?     @default(pending)
+  quoted_price     Int?
+  staff_reply      String?
+  appointment_id   BigInt?
+  created_at       DateTime?         @default(now()) @db.Timestamptz(6)
+  replied_at       DateTime?         @db.Timestamptz(6)
+  appointments     appointments?     @relation(fields: [appointment_id], references: [id], onUpdate: NoAction)
+  staff_portfolios staff_portfolios? @relation(fields: [portfolio_id], references: [id], onUpdate: NoAction)
+  staff            staff?            @relation(fields: [staff_id], references: [id], onUpdate: NoAction)
+  users            users?            @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_quote_requests_user")
+}
+
+model removal_pricing {
+  id              Int       @id @default(autoincrement())
+  service_id      Int?
+  is_continuation Boolean?  @default(false)
+  is_own_store    Boolean?  @default(true)
+  price           Int
+  includes_note   String?
+  services        services? @relation(fields: [service_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reviews {
+  id             BigInt        @id @default(autoincrement())
+  appointment_id BigInt?       @unique
+  user_id        BigInt?
+  staff_id       BigInt?
+  rating         Int?
+  comment        String?
+  created_at     DateTime?     @default(now()) @db.Timestamptz(6)
+  appointments   appointments? @relation(fields: [appointment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  staff          staff?        @relation(fields: [staff_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users          users?        @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model schedules {
+  id         BigInt   @id @default(autoincrement())
+  staff_id   BigInt?
+  work_date  DateTime @db.Date
+  start_time DateTime @db.Timestamptz(6)
+  end_time   DateTime @db.Timestamptz(6)
+  staff      staff?   @relation(fields: [staff_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([staff_id, work_date])
+}
+
+model service_addon_options {
+  id                                                           Int             @id @default(autoincrement())
+  service_id                                                   Int?
+  addon_id                                                     Int?
+  requires_service_id                                          Int?
+  service_addons                                               service_addons? @relation(fields: [addon_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  services_service_addon_options_requires_service_idToservices services?       @relation("service_addon_options_requires_service_idToservices", fields: [requires_service_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  services_service_addon_options_service_idToservices          services?       @relation("service_addon_options_service_idToservices", fields: [service_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model service_addons {
+  id                    Int                     @id @default(autoincrement())
+  name                  String                  @db.VarChar(100)
+  price                 Int                     @default(0)
+  duration_minutes      Int                     @default(0)
+  appointment_addons    appointment_addons[]
+  service_addon_options service_addon_options[]
+}
+
+model service_categories {
+  id               Int        @id @default(autoincrement())
+  name             String     @db.VarChar(100)
+  sort_order       Int?       @default(0)
+  icon_url         String?
+  description      String?
+  is_active        Boolean    @default(true)
+  duration_minutes Int        @default(30)
+  path             String     @default("/")
+  services         services[]
+}
+
+model service_prices {
+  id                Int                 @id @default(autoincrement())
+  service_id        Int?
+  label             String?             @db.VarChar(100)
+  price             Int
+  appointment_items appointment_items[]
+  services          services?           @relation(fields: [service_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model services {
+  id                                                                        Int                     @id @default(autoincrement())
+  category_id                                                               Int?
+  name                                                                      String                  @db.VarChar(255)
+  duration_minutes                                                          Int                     @default(30)
+  is_active                                                                 Boolean?                @default(true)
+  requires_quote                                                            Boolean?                @default(false)
+  sort_order                                                                Int?                    @default(0)
+  image_url                                                                 String?
+  appointment_items                                                         appointment_items[]
+  removal_pricing                                                           removal_pricing[]
+  service_addon_options_service_addon_options_requires_service_idToservices service_addon_options[] @relation("service_addon_options_requires_service_idToservices")
+  service_addon_options_service_addon_options_service_idToservices          service_addon_options[] @relation("service_addon_options_service_idToservices")
+  service_prices                                                            service_prices[]
+  service_categories                                                        service_categories?     @relation(fields: [category_id], references: [id], onUpdate: NoAction)
+  staff_portfolios                                                          staff_portfolios[]
+  staff_services                                                            staff_services[]
+}
+
+model staff {
+  id               BigInt             @id @default(autoincrement())
+  name             String             @db.VarChar(100)
+  email            String?            @unique(map: "idx_staff_email") @db.VarChar(255)
+  phone            String?            @db.VarChar(20)
+  bio              String?
+  avatar_url       String?
+  is_active        Boolean?           @default(true)
+  created_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  password_hash    String?
+  role             String?            @default("technician") @db.VarChar(20)
+  last_login       DateTime?          @db.Timestamptz(6)
+  appointments     appointments[]
+  blocked_users    blocked_users[]
+  quote_requests   quote_requests[]
+  reviews          reviews[]
+  schedules        schedules[]
+  staff_portfolios staff_portfolios[]
+  staff_services   staff_services[]
+}
+
+model staff_portfolios {
+  id              BigInt            @id @default(autoincrement())
+  staff_id        BigInt?
+  service_id      Int?
+  image_url       String?
+  caption         String?
+  sort_order      Int?              @default(0)
+  created_at      DateTime?         @default(now()) @db.Timestamptz(6)
+  portfolio_saves portfolio_saves[]
+  quote_requests  quote_requests[]
+  services        services?         @relation(fields: [service_id], references: [id], onUpdate: NoAction)
+  staff           staff?            @relation(fields: [staff_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model staff_services {
+  id         Int       @id @default(autoincrement())
+  staff_id   BigInt?
+  service_id Int?
+  services   services? @relation(fields: [service_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  staff      staff?    @relation(fields: [staff_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model users {
+  id              BigInt              @id @default(autoincrement())
+  name            String              @db.VarChar(100)
+  email           String              @db.VarChar(255)
+  phone           String?             @db.VarChar(20)
+  password_hash   String?
+  google_id       String?             @unique @db.VarChar(255)
+  line_id         String?             @unique @db.VarChar(255)
+  avatar_url      String?
+  avatar_source   avatar_source_type? @default(local)
+  is_blocked      Boolean?            @default(false)
+  created_at      DateTime?           @default(now()) @db.Timestamptz(6)
+  appointments    appointments[]
+  blocked_users   blocked_users[]
+  notifications   notifications[]
+  portfolio_saves portfolio_saves[]
+  quote_requests  quote_requests[]
+  reviews         reviews[]
+}
+
+enum appointment_status {
+  pending
+  confirmed
+  completed
+  cancelled
+  noshow
+}
+
+enum avatar_source_type {
+  local
+  google
+  line
+}
+
+enum quote_status {
+  pending
+  quoted
+  accepted
+  rejected
 }

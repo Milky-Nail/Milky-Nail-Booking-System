@@ -5,7 +5,7 @@
         <div class="flex justify-center md:justify-start items-center gap-1.5">
           <img
             class="w-10 h-10 rounded-full object-cover"
-            src="https://scontent.ftpe18-1.fna.fbcdn.net/v/t39.30808-6/573523115_122110019955048436_1801883067112579407_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=s3MyY9j_6UkQ7kNvwGjOy1a&_nc_oc=AdkzKAa6ggMg0h4WZM-aPhZ_OWiV3k8YwpxJLGNET6AOA79gyr-cUUYCg03FpgJ1etA&_nc_zt=23&_nc_ht=scontent.ftpe18-1.fna&_nc_gid=Fzrt1vO31EI4wovgoWpqdA&oh=00_AftOU5V308zBX8v0rRdtjikjrGO2Z2MN-pudLcK0Rus8OQ&oe=69A4FC71"
+            src="https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772776801/logo_x3sv4j.jpg"
             alt="logo"
           />
           <h4 class="text-black inline font-black text-3xl">Milky</h4>

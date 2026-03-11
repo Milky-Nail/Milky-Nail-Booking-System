@@ -3,13 +3,14 @@ import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
 import ServiceAndFee from "../views/ServiceAndFee.vue";
 import Gallery from "../views/Gallery.vue";
-import Booking from "../views/appointment.vue";
+import Appointment from "../views/Appointment.vue";
 import Notice from "../views/Notice.vue";
 import About from "../views/About.vue";
+import Login from "../views/Login.vue";
 
 const routes = [
   {
-    path: "/",
+    path: "/home",
     name: "Home",
     component: Home,
   },
@@ -24,9 +25,9 @@ const routes = [
     component: Gallery,
   },
   {
-    path: "/booking",
-    name: "Booking",
-    component: Booking,
+    path: "/appointment",
+    name: "Appointment",
+    component: Appointment,
   },
   {
     path: "/notice",
@@ -37,6 +38,11 @@ const routes = [
     path: "/about",
     name: "About",
     component: About,
+  },
+  {
+    path: "/login",
+    name: "Login",
+    component: Login,
   },
 ];
 
