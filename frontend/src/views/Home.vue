@@ -1,7 +1,9 @@
 <template>
-  <HeroSection />
-  <ServiceSection />
-  <GallerySection />
+  <div>
+    <HeroSection />
+    <ServiceSection />
+    <GallerySection />
+  </div>
 </template>
 <script setup lang="ts">
 import HeroSection from "../components/features/homeSections/HeroSection.vue";

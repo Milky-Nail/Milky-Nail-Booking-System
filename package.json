@@ -23,6 +23,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@line/bot-sdk": "^10.6.0",
     "@tailwindcss/cli": "^4.2.1"
   }
 }

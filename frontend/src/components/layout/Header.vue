@@ -39,7 +39,10 @@
             <button type="button" class="text-black hover:cursor-pointer">
               <img
                 class="w-10 h-10 rounded-full object-cover"
-                src="https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772776801/logo_x3sv4j.jpg"
+                :src="
+                  avatarUrl ??
+                  'https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772776801/logo_x3sv4j.jpg'
+                "
                 alt="avatar"
               />
             </button>
@@ -58,20 +61,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import BaseButton from "../ui/BaseButton.vue";
 import DropdownMenu from "../common/DropDownMenu.vue";
+import { useUserStore } from "../../stores/user";
 
 interface NavLink {
   name: string;
   zh: string;
   to: string;
 }
-const isLoggedIn = ref(false);
+const userStore = useUserStore();
+const isLoggedIn = computed(() => userStore.isLoggedIn);
+const avatarUrl = computed(() => userStore.userInfo?.avatar_url);
 const isMenuOpen = ref(false);
 const links: NavLink[] = [
   { name: "Service and Fee", zh: "服務價目", to: "/service-and-fee" },
-  { name: "Gallery", zh: "作品一覽", to: "/gallery" },
+  { name: "Gallery", zh: "當月款式", to: "/gallery" },
   { name: "Notice", zh: "預約須知", to: "/notice" },
   { name: "About", zh: "關於我們", to: "/about" },
 ];

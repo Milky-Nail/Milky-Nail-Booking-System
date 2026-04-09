@@ -1,6 +1,6 @@
 <template>
   <section class="flex-col w-full items-start min-h-dvh md:min-h-fit">
-    <div class="flex justify-center flex-wrap gap-2 mt-10 mx-3">
+    <div class="flex justify-center flex-wrap gap-2 mx-3 pt-10">
       <ServiceButton
         v-for="service in services"
         :key="service.id"
@@ -63,34 +63,73 @@
         </DetailServiceCard>
       </div>
     </Transition>
-    <el-dialog v-model="dialogVisible" @close="!selectedService">
+    <el-dialog v-model="dialogVisible" @close="!selectedService" teleported>
       <template v-if="selectedService">
-        <h2>{{ selectedService.name }}</h2>
-        <label
-          v-for="price in prices"
-          :key="price.label"
-          class="flex items-center gap-2 cursor-pointer mb-2"
-        >
-          <input type="radio" :value="price" v-model="selectedItem" required />
-          <span>{{ price.label }}：{{ price.price }} 元</span>
-        </label>
+        <div class="overflow-y-auto max-h-[50vh] pr-1">
+          <h2>{{ selectedService.name }}</h2>
+          <label
+            v-for="price in prices"
+            :key="price.label"
+            class="flex items-center gap-2 cursor-pointer mb-2"
+          >
+            <input
+              type="radio"
+              :value="price"
+              v-model="selectedItem"
+              required
+            />
+            <span>{{ price.label }}：{{ price.price }} 元</span>
+          </label>
 
-        <p>選項：</p>
-        <label
-          v-for="option in options"
-          :key="option.id"
-          class="flex items-center gap-2 cursor-pointer mb-2"
-        >
-          <input type="radio" :value="option" v-model="selectedOption" />
-          <div>
-            {{ option.service_addons.name
-            }}{{
-              option.service_addons.price == 0
-                ? ""
-                : `：${option.service_addons.price}元`
-            }}
-          </div>
-        </label>
+          <p>選項：</p>
+          <label
+            v-for="option in options"
+            :key="option.id"
+            class="flex items-center gap-2 cursor-pointer mb-2"
+          >
+            <input
+              type="checkbox"
+              :checked="isSelected(option)"
+              @change="toggleOption(option)"
+            />
+            <span>
+              {{ option.service_addons.name }}
+              {{
+                option.service_addons.price == 0
+                  ? ""
+                  : `：${option.service_addons.price}元`
+              }}
+            </span>
+            <div
+              v-if="
+                isSelected(option) &&
+                option.service_addons.allow_quantity &&
+                limits[option.service_addons.id]
+              "
+              class="flex items-center bg-gray-100 rounded-full px-2 py-1 ml-auto shadow-sm border border-gray-200"
+            >
+              <button
+                type="button"
+                @click.prevent="changeQuantity(option, -1)"
+                class="w-6 h-6 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-red-50 hover:text-red-500 active:scale-95 transition-all shadow-sm"
+              >
+                <span class="material-symbols-outlined text-sm">remove</span>
+              </button>
+
+              <span class="w-8 text-center font-bold text-gray-700 text-sm">
+                {{ getQuantity(option) }}
+              </span>
+
+              <button
+                type="button"
+                @click.prevent="changeQuantity(option, +1)"
+                class="w-6 h-6 flex items-center justify-center rounded-full bg-white text-gray-600 hover:bg-blue-50 hover:text-blue-600 active:scale-95 transition-all shadow-sm"
+              >
+                <span class="material-symbols-outlined text-sm">add</span>
+              </button>
+            </div>
+          </label>
+        </div>
       </template>
       <div class="flex">
         <ServiceButton
@@ -137,7 +176,7 @@
               <span class="font-bold text-gray-800">{{ item.item.label }}</span>
               <span
                 class="material-symbols-outlined hover:cursor-pointer"
-                @click="removeFromList(index)"
+                @click="removeFromCart(index)"
               >
                 delete
               </span>
@@ -147,21 +186,28 @@
         </div>
 
         <div
-          v-if="item.addon"
-          class="mt-3 pt-3 border-t border-dashed border-gray-100"
+          v-if="item.addons && item.addons.length > 0"
+          class="mt-3 pt-3 border-t border-dashed border-gray-100 space-y-2"
         >
           <div
+            v-for="(addon, addonIndex) in item.addons"
+            :key="addonIndex"
             class="flex justify-between items-center bg-gray-50 rounded-lg p-2"
           >
             <div class="flex items-center">
               <span
                 class="inline-block w-1.5 h-1.5 bg-red-400 rounded-full mr-2"
               ></span>
-              <span class="text-sm text-gray-600">{{ item.addon.name }}</span>
+              <span class="text-sm text-gray-600">
+                {{ addon.name }}
+                <span class="text-xs text-gray-400" v-if="addon.quantity > 1">
+                  (x{{ addon.quantity }})
+                </span>
+              </span>
             </div>
-            <span class="text-sm text-gray-500 font-medium"
-              >+${{ item.addon.price || 0 }}</span
-            >
+            <span class="text-sm text-gray-500 font-medium">
+              +${{ addon.price || 0 }}
+            </span>
           </div>
         </div>
       </div>
@@ -171,25 +217,25 @@
   </section>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed, watch } from "vue";
-import { getService, type ServiceCategory } from "../../../api/service";
+import { ref, nextTick } from "vue";
 import DetailServiceCard from "../../common/cards/DetailServiceCard.vue";
 import ServiceButton from "../../ui/ServiceButton.vue";
 import { type Services } from "../../../api/service";
 import { type ServiceAddonOption } from "../../../api/service";
 import { type ServicePrice } from "../../../api/service";
-import { type Select } from "../../../api/service";
+import { useServiceCalculator } from "../../../composables/ServiceSection/useServiceCalculator";
+import { useAppointmentCart } from "../../../composables/ServiceSection/useAppointmentCart";
+import { useServiceData } from "../../../composables/ServiceSection/useServiceData";
+import { ElMessage } from "element-plus";
 
-const services = ref<ServiceCategory[]>([]);
-const loading = ref(true);
 const selectedService = ref<Services | null>(null);
-const selectedCategory = ref<ServiceCategory | null>(null);
 const options = ref<ServiceAddonOption[] | null>([]);
 const prices = ref<ServicePrice[] | null>([]);
-const selectedOption = ref<ServiceAddonOption | null>(null);
+const selectedOptions = ref<{ option: ServiceAddonOption; quantity: number }[]>(
+  []
+);
 const dialogVisible = ref(false);
 const selectedItem = ref<ServicePrice | null>(null);
-const childAppointmentList = ref<Select[]>([]);
 const appointedList = ref<HTMLElement[]>([]);
 const emit = defineEmits([
   "update-appointment",
@@ -197,19 +243,7 @@ const emit = defineEmits([
   "update-amount",
 ]);
 
-onMounted(async () => {
-  try {
-    const data = await getService();
-    services.value = data;
-    selectedCategory.value = data[0] ?? null;
-  } finally {
-    loading.value = false;
-  }
-});
-
-const onCategorySelected = (category: ServiceCategory) => {
-  selectedCategory.value = category;
-};
+const { services, selectedCategory, onCategorySelected } = useServiceData();
 
 const chooseService = async (service: Services) => {
   selectedService.value = service;
@@ -222,71 +256,158 @@ const chooseService = async (service: Services) => {
 const cancel = () => {
   dialogVisible.value = false;
 };
-const select = async () => {
-  if (!selectedItem.value || !selectedCategory.value) return;
-  const newSelection: Select = {
-    categoryName: selectedCategory.value.name,
-    categoryTime: selectedCategory.value.duration_minutes,
-    category: selectedCategory.value,
-    item: selectedItem.value,
-    addon: selectedOption.value?.service_addons ?? null,
-  };
-  childAppointmentList.value.push(newSelection);
-  selectedItem.value = null;
-  selectedOption.value = null;
-  dialogVisible.value = false;
-  await nextTick();
-  if (Array.isArray(appointedList.value) && appointedList.value.length > 0) {
-    const lastIndex = appointedList.value.length - 1;
-    const lastItem = appointedList.value[lastIndex];
-    if (lastItem) {
-      lastItem.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
+
+const { childAppointmentList, addToCart, removeFromCart } =
+  useAppointmentCart(emit);
+
+const isSelected = (option: ServiceAddonOption) =>
+  selectedOptions.value.some((o) => o.option.id === option.id);
+
+const getQuantity = (option: ServiceAddonOption) =>
+  selectedOptions.value.find((o) => o.option.id === option.id)?.quantity ?? 1;
+
+const noAddonId = 24;
+const fullExtensionId = 21;
+const singleExtensionId = 22;
+const jumpOneId = 3;
+const jumpTwoId = 4;
+const removeThisId = 8;
+const removeElseId = 9;
+const stampOneId = 11;
+const stampTenId = 12;
+
+const toggleOption = (option: ServiceAddonOption) => {
+  const addonId = option.service_addons.id;
+
+  if (isSelected(option)) {
+    selectedOptions.value = selectedOptions.value.filter(
+      (o) => o.option.id !== option.id
+    );
+    return;
   }
 
-  emit("update-appointment", childAppointmentList.value);
+  // 勾選「不加購」→ 清空其他全部
+  if (addonId === noAddonId) {
+    selectedOptions.value = [{ option, quantity: 1 }];
+    return;
+  }
+
+  // 勾選其他項目時，如果有「不加購」先移除
+  selectedOptions.value = selectedOptions.value.filter(
+    (o) => o.option.service_addons.id !== noAddonId
+  );
+
+  // 勾選「全手延甲」→ 移除「單指延甲」
+  if (addonId === fullExtensionId) {
+    selectedOptions.value = selectedOptions.value.filter(
+      (o) => o.option.service_addons.id !== singleExtensionId
+    );
+  }
+
+  // 勾選「單指延甲」→ 移除「全手延甲」
+  if (addonId === singleExtensionId) {
+    selectedOptions.value = selectedOptions.value.filter(
+      (o) => o.option.service_addons.id !== fullExtensionId
+    );
+  }
+  // 跳一色/兩色互斥
+  if (addonId === jumpOneId) {
+    selectedOptions.value = selectedOptions.value.filter(
+      (o) => o.option.service_addons.id !== jumpTwoId
+    );
+  }
+
+  if (addonId === jumpTwoId) {
+    selectedOptions.value = selectedOptions.value.filter(
+      (o) => o.option.service_addons.id !== jumpOneId
+    );
+  }
+  // 卸甲本店/他店互斥
+  if (addonId === removeThisId) {
+    selectedOptions.value = selectedOptions.value.filter(
+      (o) => o.option.service_addons.id !== removeElseId
+    );
+  }
+
+  if (addonId === removeElseId) {
+    selectedOptions.value = selectedOptions.value.filter(
+      (o) => o.option.service_addons.id !== removeThisId
+    );
+  }
+  // 鋼板單指/十指互斥
+  if (addonId === stampOneId) {
+    selectedOptions.value = selectedOptions.value.filter(
+      (o) => o.option.service_addons.id !== stampTenId
+    );
+  }
+
+  if (addonId === stampTenId) {
+    selectedOptions.value = selectedOptions.value.filter(
+      (o) => o.option.service_addons.id !== stampOneId
+    );
+  }
+
+  selectedOptions.value.push({ option, quantity: 1 });
 };
 
-const removeFromList = (index: number) => {
-  childAppointmentList.value.splice(index, 1);
-  emit("update-appointment", childAppointmentList.value);
+const limits: Record<number, number> = {
+  10: 10,
+  11: 6,
+  12: 10,
+  13: 10,
+  14: 10,
+  15: 10,
+  22: 6,
+  23: 10,
 };
 
-const totalAmount = computed(() => {
-  return childAppointmentList.value.reduce((sum, cur) => {
-    const itemPrice = cur.item.price || 0;
-    const addonPrice = cur.addon?.price || 0;
-    return sum + itemPrice + addonPrice;
-  }, 0);
-});
+const changeQuantity = (option: ServiceAddonOption, delta: number) => {
+  const item = selectedOptions.value.find((o) => o.option.id === option.id);
+  if (!item) return;
 
-const totalDuration = computed(() => {
-  const actualSum = childAppointmentList.value.reduce((sum, cur) => {
-    const itemDuration = cur.categoryTime || 0;
-    const addonDuration = cur.addon?.duration_minutes || 0;
-    return sum + itemDuration + addonDuration < 300
-      ? sum + itemDuration + addonDuration
-      : 300;
-  }, 0);
-  return Math.min(actualSum, 300);
-});
+  const addonId = option.service_addons.id;
+  const maxQuantity = limits[addonId] ?? 1;
 
-watch(
-  totalDuration,
-  (newVal) => {
-    emit("update-duration", newVal);
-  },
-  { immediate: true }
-);
+  const newQuantity = item.quantity + delta;
+  if (newQuantity <= 0) {
+    selectedOptions.value = selectedOptions.value.filter(
+      (o) => o.option.id !== option.id
+    );
+  } else if (newQuantity <= maxQuantity) {
+    item.quantity = newQuantity;
+  } else {
+    ElMessage({
+      showClose: true,
+      message: "超過數量上限！",
+      type: "warning",
+      duration: 3000,
+    });
+  }
+};
 
-watch(
-  totalAmount,
-  (newVal) => {
-    emit("update-amount", newVal);
-  },
-  { immediate: true }
+const select = async () => {
+  if (!selectedItem.value || !selectedCategory.value) return;
+  const addons = selectedOptions.value.map((o) => ({
+    addon_id: o.option.addon_id!,
+    name: o.option.service_addons.name,
+    price: o.option.service_addons.price,
+    duration_minutes: o.option.service_addons.duration_minutes,
+    quantity: o.quantity,
+  }));
+
+  addToCart(selectedCategory.value, selectedItem.value, addons);
+  selectedItem.value = null;
+  selectedOptions.value = [];
+  dialogVisible.value = false;
+  await nextTick();
+  const lastItem = appointedList.value[appointedList.value.length - 1];
+  if (lastItem) {
+    lastItem.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+};
+
+const { totalAmount, totalDuration } = useServiceCalculator(
+  childAppointmentList,
+  emit
 );
 </script>

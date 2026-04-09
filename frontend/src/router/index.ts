@@ -7,6 +7,10 @@ import Appointment from "../views/Appointment.vue";
 import Notice from "../views/Notice.vue";
 import About from "../views/About.vue";
 import Login from "../views/Login.vue";
+import LoginFailed from "../views/LoginFailed.vue";
+import Member from "../views/Member.vue";
+import OrderRecords from "../views/OrderRecords.vue";
+import Management from "../views/Management.vue";
 
 const routes = [
   {
@@ -43,6 +47,26 @@ const routes = [
     path: "/login",
     name: "Login",
     component: Login,
+  },
+  {
+    path: "/login-failed",
+    name: "LoginFailed",
+    component: LoginFailed,
+  },
+  {
+    path: "/member",
+    name: "Member",
+    component: Member,
+  },
+  {
+    path: "/order-records",
+    name: "OrderRecords",
+    component: OrderRecords,
+  },
+  {
+    path: "/management",
+    name: "Management",
+    component: Management,
   },
 ];
 
