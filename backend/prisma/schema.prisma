@@ -13,8 +13,11 @@ model appointment_addons {
   addon_id          Int?
   price_snapshot    Int
   duration_snapshot Int             @default(0)
+  appointment_item_id BigInt?
+  quantity          Int             @default(1)
   service_addons    service_addons? @relation(fields: [addon_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   appointments      appointments?   @relation(fields: [appointment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  appointment_items   appointment_items? @relation(fields: [appointment_item_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model appointment_items {
@@ -27,6 +30,7 @@ model appointment_items {
   appointments      appointments?   @relation(fields: [appointment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   services          services?       @relation(fields: [service_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   service_price     service_prices? @relation(fields: [service_price_id], references: [id])
+  appointment_addons appointment_addons[]
 }
 
 model appointments {
@@ -134,6 +138,7 @@ model schedules {
   work_date  DateTime @db.Date
   start_time DateTime @db.Timestamptz(6)
   end_time   DateTime @db.Timestamptz(6)
+  status     schedule_status    @default(active)
   staff      staff?   @relation(fields: [staff_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([staff_id, work_date])
@@ -154,6 +159,7 @@ model service_addons {
   name                  String                  @db.VarChar(100)
   price                 Int                     @default(0)
   duration_minutes      Int                     @default(0)
+  allow_quantity        Boolean                 @default(false)
   appointment_addons    appointment_addons[]
   service_addon_options service_addon_options[]
 }
@@ -244,7 +250,7 @@ model staff_services {
 model users {
   id              BigInt              @id @default(autoincrement())
   name            String              @db.VarChar(100)
-  email           String              @db.VarChar(255)
+  email           String              @unique @db.VarChar(255)
   phone           String?             @db.VarChar(20)
   password_hash   String?
   google_id       String?             @unique @db.VarChar(255)
@@ -259,6 +265,23 @@ model users {
   portfolio_saves portfolio_saves[]
   quote_requests  quote_requests[]
   reviews         reviews[]
+  role            user_role_type      @default(user)
+}
+
+model post {
+  id          String   @id @default(uuid())
+  title       String  
+  image_url  String   
+  price       Int      
+  tags        String[] 
+  description String
+  created_at   DateTime @default(now())
+}
+
+enum user_role_type {
+  user
+  admin
+  technician
 }
 
 enum appointment_status {
@@ -280,4 +303,9 @@ enum quote_status {
   quoted
   accepted
   rejected
+}
+
+enum schedule_status {
+  active
+  cancelled
 }

@@ -12,6 +12,7 @@ export interface ServiceAddon {
   name: string;
   price: number;
   duration_minutes: number;
+  allow_quantity: boolean;
 }
 
 export interface ServiceAddonOption {
@@ -43,12 +44,21 @@ export interface ServiceCategory {
   services: Services[];
 }
 
+export interface SelectedAddon {
+  addon_id: number;
+  name: string;
+  price: number;
+  duration_minutes: number;
+  quantity: number;
+}
+
 export interface Select {
   categoryName: string;
   categoryTime: number;
   category: ServiceCategory;
   item: ServicePrice;
-  addon: ServiceAddon | null;
+  requires_quote: Boolean;
+  addons: SelectedAddon[];
 }
 
 const getService = (): Promise<ServiceCategory[]> => apiClient.get("/services");
