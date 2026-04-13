@@ -300,9 +300,10 @@ enum avatar_source_type {
 
 enum quote_status {
   pending
-  quoted
-  accepted
-  rejected
+  confirmed
+  completed
+  cancelled
+  noshow
 }
 
 enum schedule_status {

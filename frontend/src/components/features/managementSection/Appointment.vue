@@ -41,7 +41,7 @@
   <section>
     <div class="font-serif text-2xl font-bold">
       <el-table :data="filteredList">
-        <el-table-column label="日期" prop="date" sortable />
+        <el-table-column label="日期" prop="date" sortable min-width="100" />
         <el-table-column label="開始時間" prop="startTime" sortable />
         <el-table-column label="結束時間" prop="endTime" sortable />
         <el-table-column label="會員" prop="member" sortable />
@@ -75,7 +75,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="加購數量" min-width="150">
+        <el-table-column label="加購數量">
           <template #default="{ row }">
             <div class="flex flex-col items-start gap-1">
               <el-tag
@@ -90,7 +90,12 @@
           </template>
         </el-table-column>
         <el-table-column label="金額" prop="total_price" sortable />
-        <el-table-column label="狀態" sortable :sort-method="sortByStatus">
+        <el-table-column
+          label="狀態"
+          sortable
+          :sort-method="sortByStatus"
+          min-width="150"
+        >
           <template #default="{ row }">
             <div class="flex items-center gap-1">
               <span
@@ -195,6 +200,7 @@ const fetchData = async () => {
   try {
     const res = await getAppointmentByTime(
       queryDate,
+      false,
       currentPage.value,
       pageSize.value
     );

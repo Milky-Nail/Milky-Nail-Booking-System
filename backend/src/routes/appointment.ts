@@ -10,7 +10,11 @@ router.patch(
   isAdmin,
   AppointmentHandler.changeStatusByAdmin
 );
-router.get("/user", AppointmentHandler.getAppointmentListByUser);
+router.get(
+  "/user",
+  authMiddleWare,
+  AppointmentHandler.getAppointmentListByUser
+);
 router.get("/staff", AppointmentHandler.getAppointmentListByStaff);
 router.post("/", AppointmentHandler.createNewAppointment);
 router.patch(

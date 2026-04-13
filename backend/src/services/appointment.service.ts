@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 import { appointment_status, quote_status } from "../generated/prisma/index.js";
-import { pushLineNotification } from "./lineMessage.service.js";
+import { pushAppointmentNotification } from "./lineMessage.service.js";
 
 export interface AppointmentItem {
   service_id: number;
@@ -54,12 +54,31 @@ export interface PaginationQuery {
 }
 
 const AppointmentService = {
-  async getAppointmentsByTime(time: Date, pagination: PaginationQuery = {}) {
+  async getAppointmentsByTime(
+    time: Date,
+    isTilNow: boolean,
+    pagination: PaginationQuery = {}
+  ) {
     if (!time) {
       throw new Error("未選定時間區間");
     }
-    if (time.getTime() > Date.now()) {
-      throw new Error("不得回傳超過現在時刻之時間");
+    let whereCondition;
+
+    if (isTilNow) {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+
+      whereCondition = {
+        gte: startOfDay,
+        lte: endOfDay,
+      };
+    } else {
+      whereCondition = {
+        gte: time,
+      };
     }
 
     const page = Number(pagination.page) || 1;
@@ -68,13 +87,13 @@ const AppointmentService = {
 
     try {
       const [data, total] = await Promise.all([
-        //可以同時發送兩個獨立的資料庫請求（取資料與算總數），而不是一個接著一個做
+        //all可以同時發送兩個獨立的資料庫請求（取資料與算總數），而不是一個接著一個做
         prisma.appointments.findMany({
           orderBy: { start_time: "desc" },
           skip: skip,
           take: limit,
           where: {
-            start_time: { gte: time },
+            start_time: whereCondition,
           },
           include: {
             staff: {
@@ -101,7 +120,7 @@ const AppointmentService = {
         }),
         prisma.appointments.count({
           //計算總筆數
-          where: { start_time: { gte: time } },
+          where: { start_time: whereCondition },
         }),
       ]);
       return {
@@ -256,98 +275,91 @@ const AppointmentService = {
       throw new Error("日期格式錯誤，無法解析時間");
     }
 
-    // 檢查美甲師時段是否衝突
-    const conflict = await prisma.appointments.findFirst({
-      where: {
-        staff_id: data.staff_id,
-        status: { not: appointment_status.cancelled },
-        start_time: { lt: endDate }, // 現有預約的開始時間在新預約結束時間之前
-        end_time: { gt: startDate }, // 現有預約的結束時間在新預約開始時間之前
-        // 兩個條件都成立的話就是衝突
-      },
-    });
-    if (conflict) {
-      throw new Error("該時段美甲師已被預約");
-    }
-
-    // 執行寫入
-    const newAppointment = await prisma.appointments.create({
-      data: {
-        start_time: startDate,
-        end_time: endDate,
-        total_price: data.total_price,
-        staff_id: BigInt(data.staff_id),
-        user_id: data.user_id ? BigInt(data.user_id) : null, // 保留訪客預約的可能
-        note: data.note,
-        status: data.status,
-        appointment_items: {
-          create: data.appointment_items.map((item) => ({
-            // 包個()表示是要回傳整個物件，而不是執行{}中的指令
-            service_id: Number(item.service_id),
-            service_price_id: Number(item.service_price_id),
-            price_snapshot: Number(item.price_snapshot),
-            duration_snapshot: Number(item.duration_snapshot),
-
-            // 這裡處理該項目對應的加購
-            appointment_addons: {
-              create: (item.appointment_addons || []).map((addon) => ({
-                addon_id: Number(addon.addon_id),
-                price_snapshot: Number(addon.price_snapshot),
-                duration_snapshot: Number(addon.duration_snapshot),
-                quantity: Number(addon.quantity || 1),
-                // 這裡不需要手動傳 appointment_id，Prisma 會幫處理
-              })),
-            },
-          })),
+    const newAppointment = await prisma.$transaction(async (tx) => {
+      // 檢查時段衝突
+      const conflict = await tx.appointments.findFirst({
+        where: {
+          staff_id: data.staff_id,
+          status: { not: "cancelled" },
+          start_time: { lt: endDate },
+          end_time: { gt: startDate },
         },
-        ...(data.quote_request && {
-          quote_requests: {
-            create: {
-              user_id: data.user_id ? BigInt(data.user_id) : null,
-              staff_id: BigInt(data.staff_id),
-              image_url: data.quote_request.image_url,
-              description: data.quote_request.description,
-              status: quote_status.pending,
-            },
-          },
-        }),
-      },
-      include: {
-        quote_requests: true,
-        appointment_items: {
-          include: {
-            appointment_addons: true,
+      });
+
+      if (conflict) throw new Error("該時段美甲師已被預約");
+
+      // 建立預約主表與項目清單
+      const appointment = await tx.appointments.create({
+        data: {
+          start_time: startDate,
+          end_time: endDate,
+          total_price: data.total_price,
+          staff_id: BigInt(data.staff_id),
+          user_id: data.user_id ? BigInt(data.user_id) : null,
+          note: data.note,
+          status: data.status,
+          appointment_items: {
+            create: data.appointment_items.map((item) => ({
+              service_id: Number(item.service_id),
+              service_price_id: Number(item.service_price_id),
+              price_snapshot: Number(item.price_snapshot),
+              duration_snapshot: Number(item.duration_snapshot),
+              appointment_addons: {
+                create: (item.appointment_addons || []).map((addon) => ({
+                  addon_id: Number(addon.addon_id),
+                  price_snapshot: Number(addon.price_snapshot),
+                  duration_snapshot: Number(addon.duration_snapshot),
+                  quantity: Number(addon.quantity || 1),
+                })),
+              },
+            })),
           },
         },
-      },
+        include: {
+          appointment_items: {
+            include: { appointment_addons: true },
+          },
+        },
+      });
+
+      // 如果有詢價需求，手動建立並連結 appointment_id
+      if (data.quote_request && data.quote_request.image_url) {
+        await tx.quote_requests.create({
+          data: {
+            user_id: data.user_id ? BigInt(data.user_id) : null,
+            staff_id: BigInt(data.staff_id),
+            image_url: data.quote_request.image_url,
+            description: data.quote_request.description || "",
+            status: "pending",
+            appointment_id: appointment.id,
+          },
+        });
+      }
+
+      return appointment;
     });
+
+    // 發送 LINE 通知
     const lineId = data.line_id;
     if (lineId) {
       const bookingItems = data.appointment_items.map((item) => {
         const dbPrice = dbPrices.find((p) => p.id === item.service_price_id);
-        const serviceName = dbPrice?.services?.name || "未知服務";
-        const addonDetails = (item.appointment_addons || []).map((addon) => {
-          const dbAddon = dbAddons.find((a) => a.id === addon.addon_id);
-          return {
-            name: dbAddon?.name || "未知服務",
-            quantity: addon.quantity || 1,
-          };
-        });
         return {
-          service_name: serviceName,
-          addons: addonDetails,
+          service_name: dbPrice?.services?.name || "未知服務",
+          addons: (item.appointment_addons || []).map((addon) => ({
+            name:
+              dbAddons.find((a) => a.id === addon.addon_id)?.name || "未知加購",
+            quantity: addon.quantity || 1,
+          })),
         };
       });
 
-      const startTime = new Date(data.start_time);
-      const bookingData = {
-        start_time: startTime,
+      pushAppointmentNotification(lineId, {
+        start_time: startDate,
         appointment_items: bookingItems,
-      };
-      await pushLineNotification(lineId, bookingData).catch((err) =>
-        console.error("LINE 通知發送失敗:", err)
-      );
+      }).catch((err) => console.error("LINE 通知失敗:", err));
     }
+
     return newAppointment;
   },
   async handleUserCancellation(id: number, userId: number) {
@@ -407,7 +419,20 @@ const AppointmentService = {
     if (currentAppointment.status === newStatus) return currentAppointment;
     return await prisma.appointments.update({
       where: { id: id },
-      data: { status: newStatus as appointment_status },
+      data: {
+        status: newStatus as appointment_status,
+        quote_requests: {
+          updateMany: {
+            where: { appointment_id: id },
+            data: {
+              status: newStatus as quote_status,
+            },
+          },
+        },
+      },
+      include: {
+        quote_requests: true,
+      },
     });
   },
 };

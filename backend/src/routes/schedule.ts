@@ -1,5 +1,6 @@
 import { SchedulesHandler } from "../controllers/schedule.controller";
 import { Router } from "express";
+import { isAdmin } from "src/middlewares/auth.middleware";
 import multer from "multer";
 
 const router = Router();
@@ -23,7 +24,16 @@ const upload = multer({
 
 router.get("/", SchedulesHandler.getScheduleList);
 router.get("/:staffId", SchedulesHandler.getScheduleListByStaff);
-router.post("/upload", upload.single("file"), SchedulesHandler.uploadSchedule);
-router.post("/:staffId/:workDate/cancel", SchedulesHandler.cancelSchedule);
+router.post(
+  "/upload",
+  isAdmin,
+  upload.single("file"),
+  SchedulesHandler.uploadSchedule
+);
+router.post(
+  "/:staffId/:workDate/cancel",
+  isAdmin,
+  SchedulesHandler.cancelSchedule
+);
 
 export default router;
