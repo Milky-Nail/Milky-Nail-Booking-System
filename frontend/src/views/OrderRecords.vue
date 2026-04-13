@@ -107,7 +107,7 @@ const userStore = useUserStore();
 const appointmentStore = useAppointmentStore();
 const statusMap: Record<string, string> = {
   pending: "待確認",
-  confirmed: "已預約",
+  confirmed: "已確認",
   completed: "已完成",
   cancelled: "已取消",
   noshow: "未到店",

@@ -7,6 +7,7 @@ import authRouter from "./auth";
 import userRouter from "./user";
 import uploadImageRouter from "./upload";
 import galleyRouter from "./gallery";
+import quoteRouter from "./quote";
 
 const rootRouter = Router();
 
@@ -18,5 +19,6 @@ rootRouter.use("/auth", authRouter);
 rootRouter.use("/user", userRouter);
 rootRouter.use("/upload", uploadImageRouter);
 rootRouter.use("/gallery", galleyRouter);
+rootRouter.use("/quote", quoteRouter);
 
 export default rootRouter;

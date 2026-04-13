@@ -8,13 +8,19 @@ const AppointmentHandler = {
       const page = req.query.page ? Number(req.query.page) : 1;
       const limit = req.query.limit ? Number(req.query.limit) : 10;
       const queryDate = new Date(Number(startFrom));
+      const isTilNow = JSON.parse(req.query.isTilNow as string);
+      const pagination = {
+        page,
+        limit,
+      };
       if (isNaN(queryDate.getTime())) {
         return res.status(400).json({ message: "無效的時間格式" });
       }
-      const result = await AppointmentService.getAppointmentsByTime(queryDate, {
-        page: Number(page),
-        limit: Number(limit),
-      });
+      const result = await AppointmentService.getAppointmentsByTime(
+        queryDate,
+        isTilNow,
+        pagination
+      );
       res.json(result);
     } catch (err) {
       res.status(500).json({ message: "server error", err });

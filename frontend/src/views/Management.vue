@@ -32,6 +32,7 @@
       <Membership v-if="currentPagination === 'membership'" />
       <Stylist v-if="currentPagination === 'stylist'" />
       <Gallery v-if="currentPagination === 'gallery'" />
+      <Quote v-if="currentPagination === 'quote'" />
     </div>
   </section>
 </template>
@@ -41,6 +42,7 @@ import Membership from "../components/features/managementSection/Membership.vue"
 import Stylist from "../components/features/managementSection/Stylist.vue";
 import Gallery from "../components/features/managementSection/Gallery.vue";
 import Dashboard from "../components/features/managementSection/Dashboard.vue";
+import Quote from "../components/features/managementSection/Quote.vue";
 import { ref } from "vue";
 
 const managementList = [
@@ -49,6 +51,7 @@ const managementList = [
   { name: "membership", zh_name: "會員管理" },
   { name: "stylist", zh_name: "美甲師管理" },
   { name: "gallery", zh_name: "當月款式管理" },
+  { name: "quote", zh_name: "傳圖詢價管理" },
 ];
 
 const currentPagination = ref("dashboard");

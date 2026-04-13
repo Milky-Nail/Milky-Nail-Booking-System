@@ -96,6 +96,7 @@ const createAppointment = (data: AppointmentData): Promise<AppointmentData> =>
 
 const getAppointmentByTime = async (
   targetDate: Date,
+  isTilNow: boolean,
   page = 1,
   limit = 10
 ): Promise<AppointmentResponse | null> => {
@@ -104,7 +105,7 @@ const getAppointmentByTime = async (
     const res = (await apiClient.get<AppointmentResponse>(
       `/appointments/search`,
       {
-        params: { startFrom: timestamp, page, limit },
+        params: { startFrom: timestamp, isTilNow, page, limit },
       }
     )) as unknown as AppointmentResponse;
     return res;

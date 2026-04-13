@@ -108,7 +108,7 @@ const UserService = {
     if (!user) throw new Error("找不到使用者");
     return prisma.users.update({
       where: { id: BigInt(userId) },
-      data: { is_blocked: newStatus },
+      data: { is_blocked: newStatus }, //TODO:增加blocked_user欄位update
     });
   },
 };
