@@ -1,11 +1,13 @@
 <template>
-  <header class="fixed inset-x-0 top-0 z-50 bg-secondary text-white">
+  <header
+    class="main-header fixed inset-x-0 top-0 z-50 bg-secondary text-white"
+  >
     <div class="h-20">
       <div class="relative flex h-full items-center justify-between px-4">
         <RouterLink to="/home" class="flex gap-2 items-center">
           <img
             class="w-10 h-10 rounded-full object-cover"
-            src="https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772776801/logo_x3sv4j.jpg"
+            src="https://res.cloudinary.com/dsjw5wnvg/image/upload/v1776184355/logo_gxzpph.jpg"
             alt="logo"
           />
           <h2 class="text-black inline font-black text-3xl">Milky</h2>
@@ -41,7 +43,7 @@
                 class="w-10 h-10 rounded-full object-cover"
                 :src="
                   avatarUrl ??
-                  'https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772776801/logo_x3sv4j.jpg'
+                  'https://res.cloudinary.com/dsjw5wnvg/image/upload/v1776184355/logo_gxzpph.jpg'
                 "
                 alt="avatar"
               />
@@ -61,10 +63,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import BaseButton from "../ui/BaseButton.vue";
 import DropdownMenu from "../common/DropDownMenu.vue";
 import { useUserStore } from "../../stores/user";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
+onMounted(() => {
+  gsap.to(".main-header", {
+    backgroundColor: "rgba(247, 235, 239, 0.7)",
+    boxShadow: "0px 2px 10px rgba(0,0,0,0.1)",
+    duration: 0.3,
+    scrollTrigger: {
+      trigger: "body",
+      start: "top -50",
+      end: "top -50",
+      toggleActions: "play none reverse none",
+    },
+  });
+});
 
 interface NavLink {
   name: string;

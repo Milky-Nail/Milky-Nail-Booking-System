@@ -1,7 +1,7 @@
 <template>
   <section>
     <div
-      class="bg-[url(https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772124607/woman-receiving-manicure-from-woman-gloves-mask-beauty-salon-daytime_oqw27a.jpg)] w-9/10 md:h-dvh bg-cover bg-center flex flex-col text-white gap-4 rounded-2xl mx-auto mb-20 transition-transform duration-500 hover:scale-101 mt-10"
+      class="bg-[url(https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772124541/close-up-client-manicure-appointment_gtcswk.jpg)] w-9/10 md:h-dvh bg-cover bg-center flex flex-col text-white gap-4 rounded-2xl mx-auto mb-20 transition-transform duration-500 hover:scale-101 mt-10"
     >
       <div
         class="mx-auto my-auto md:ml-10 md:mt-10 flex flex-col gap-8 bg-white/20 backdrop-blur-sm hover:backdrop-blur-md transition-backdrop-blur-md duration-500 rounded-2xl p-6 md:p-10 w-8/9 lg:w-5/6 xl:w-1/2"
