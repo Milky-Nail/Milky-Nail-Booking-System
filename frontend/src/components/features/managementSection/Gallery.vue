@@ -57,13 +57,83 @@
       </el-button>
     </div>
   </section>
+  <section class="p-4">
+    <div class="flex flex-row gap-4 mb-6">
+      <div
+        v-for="work in currentPageData"
+        :key="work.id"
+        class="w-1/3 shrink-0"
+      >
+        <el-card shadow="hover" :body-style="{ padding: '0px' }" class="h-full">
+          <div class="h-48 w-full overflow-hidden">
+            <img
+              :src="work.image_url"
+              alt="work image"
+              class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            />
+          </div>
+
+          <div class="p-4">
+            <h3 class="text-lg font-bold mb-2 truncate text-gray-800">
+              {{ work.title }}
+            </h3>
+
+            <div class="flex flex-wrap gap-2">
+              <el-tag
+                type="danger"
+                v-for="(tag, index) in work.tags"
+                :key="index"
+                size="small"
+                effect="plain"
+              >
+                {{ tag }}
+              </el-tag>
+            </div>
+          </div>
+          <template #footer>
+            <div class="flex justify-between">
+              <el-button
+                type="danger"
+                :disabled="work.is_showed"
+                @click="handleShowing(work.id, true)"
+                >上架</el-button
+              >
+              <el-button
+                type="danger"
+                :disabled="!work.is_showed"
+                @click="handleShowing(work.id, false)"
+                >隱藏</el-button
+              >
+            </div>
+          </template>
+        </el-card>
+      </div>
+    </div>
+
+    <div class="flex justify-center mt-8">
+      <el-pagination
+        v-model:current-page="currentPage"
+        :page-size="pageSize"
+        layout="prev, pager, next"
+        :total="workList?.data?.length || 0"
+        background
+      />
+    </div>
+  </section>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { UPLOAD_URL, type UploadResponse } from "../../../api/uploadImage";
 import BaseUpload from "../../common/BaseUpload.vue";
-import { uploadWork, type Gallery } from "../../../api/gallery";
+import {
+  uploadWork,
+  getWorks,
+  type Gallery,
+  type WorkResponse,
+  showWorkOrNot,
+} from "../../../api/gallery";
 import { useUserStore } from "../../../stores/user";
+import { ElMessage } from "element-plus";
 
 const userStore = useUserStore();
 const imageUrl = ref<string>("");
@@ -72,11 +142,37 @@ const price = ref<number>(0);
 const description = ref<string>("");
 const tags = ref<string[]>([]);
 const imageUploadRef = ref<InstanceType<typeof BaseUpload>>();
+const workList = ref<WorkResponse | null>(null);
+const currentPage = ref(1);
+const pageSize = 3;
+const currentPageData = computed(() => {
+  const data = workList.value?.data || [];
+  const start = (currentPage.value - 1) * pageSize;
+  const end = start + pageSize;
+  return data.slice(start, end);
+});
+
+const fetchWorks = async () => {
+  const res = await getWorks({
+    tag: undefined,
+    price: undefined,
+    pagination: { page: undefined, limit: undefined },
+  });
+  workList.value = res;
+};
+onMounted(async () => {
+  await fetchWorks();
+});
 
 const handleWorkImageSuccess = (res: UploadResponse) => {
   imageUrl.value = res.url;
 };
 
+const handleShowing = async (id: string, status: boolean) => {
+  await showWorkOrNot(id, status);
+  ElMessage.success("狀態更改成功！");
+  fetchWorks();
+};
 const upload = async () => {
   if (!title.value || !price.value || !description.value || !imageUrl.value) {
     return;
@@ -99,6 +195,8 @@ const upload = async () => {
     description.value = "";
     tags.value = [];
     imageUploadRef.value?.clear();
+    fetchWorks();
+    ElMessage.success("上傳成功！");
   } catch (err) {
     console.error("上傳過程發生錯誤：", err);
     alert(err instanceof Error ? err.message : "上傳失敗");

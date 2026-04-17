@@ -276,6 +276,7 @@ model post {
   tags        String[] 
   description String
   created_at   DateTime @default(now())
+  is_showed Boolean @default(true)
 }
 
 enum user_role_type {
