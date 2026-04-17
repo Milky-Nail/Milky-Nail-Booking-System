@@ -39,7 +39,6 @@
             <p class="font-serif text-sm">
               所需時間：約 {{ service.duration_minutes }} 分鐘
             </p>
-            <BaseButton :to="service.path"> {{ serviceCardButton }}</BaseButton>
           </div>
         </template>
       </ServiceCard>
@@ -58,13 +57,11 @@
 </template>
 <script setup lang="ts">
 import ServiceCard from "../../common/cards/ServiceCard.vue";
-import BaseButton from "../../ui/BaseButton.vue";
 import { computed, onMounted, ref } from "vue";
 import { getService, type ServiceCategory } from "../../../api/service";
 
 const services = ref<ServiceCategory[]>([]);
 const loading = ref(true);
-const serviceCardButton = ref("詳細項目");
 
 onMounted(async () => {
   try {
