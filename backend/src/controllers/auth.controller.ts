@@ -15,8 +15,8 @@ const lineInit = (req: Request, res: Response) => {
   res.clearCookie("line_auth_state", { path: "/" });
   res.cookie("line_auth_state", state, {
     httpOnly: true, //防XSS
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax", // 防 CSRF
+    secure: process.env.NODE_ENV !== "development",
+    sameSite: "none",
     maxAge: 5 * 60 * 1000,
     path: "/",
   });
@@ -58,8 +58,8 @@ const lineCallback = async (req: Request, res: Response) => {
     res.cookie("auth_token", token, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      secure: process.env.NODE_ENV === "production", //TODO:正式環境必開 HTTPS
-      sameSite: "lax",
+      secure: process.env.NODE_ENV !== "development",
+      sameSite: "none",
     });
     res.redirect(`${process.env.FRONTEND_URL}/home`);
   } catch (err) {
@@ -86,8 +86,8 @@ const googleCallback = [
     res.cookie("auth_token", token, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: process.env.NODE_ENV !== "development",
+      sameSite: "none",
     });
     res.redirect(`${process.env.FRONTEND_URL}/home`);
   },
