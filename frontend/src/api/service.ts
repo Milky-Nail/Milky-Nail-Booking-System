@@ -5,6 +5,7 @@ export interface ServicePrice {
   service_id: number;
   label: string;
   price: number;
+  requires_quote?: boolean;
 }
 
 export interface ServiceAddon {

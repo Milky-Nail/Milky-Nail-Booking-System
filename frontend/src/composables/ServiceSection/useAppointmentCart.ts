@@ -2,7 +2,6 @@ import { ref, type Ref } from "vue";
 import {
   type Select,
   type ServicePrice,
-  type ServiceAddonOption,
   type ServiceCategory,
   type SelectedAddon,
 } from "../../api/service";
@@ -25,6 +24,7 @@ export function useAppointmentCart(emit: AppointmentCartEvents) {
       category: category,
       item,
       addons,
+      requires_quote: item.requires_quote ?? false,
     };
 
     childAppointmentList.value.push(newSelection);

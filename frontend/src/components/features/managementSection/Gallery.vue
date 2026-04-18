@@ -125,13 +125,7 @@
 import { ref, onMounted, computed } from "vue";
 import { UPLOAD_URL, type UploadResponse } from "../../../api/uploadImage";
 import BaseUpload from "../../common/BaseUpload.vue";
-import {
-  uploadWork,
-  getWorks,
-  type Gallery,
-  type WorkResponse,
-  showWorkOrNot,
-} from "../../../api/gallery";
+import { uploadWork, type Gallery, showWorkOrNot } from "../../../api/gallery";
 import { useUserStore } from "../../../stores/user";
 import { ElMessage } from "element-plus";
 import { useWorks } from "../../../composables/Gallery/useWorks";

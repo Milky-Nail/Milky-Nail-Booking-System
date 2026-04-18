@@ -87,7 +87,7 @@ const router = createRouter({
   },
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   const userStore = useUserStore();
 
   // --- 設定瀏覽器標題邏輯 ---
