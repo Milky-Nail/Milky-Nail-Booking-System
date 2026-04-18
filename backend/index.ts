@@ -18,7 +18,7 @@ app.use(
       "http://localhost:5173",
       "https://milky-nail-test.onrender.com",
       `${process.env.FRONTEND_URL}`,
-    ], // TODO:正式上線前要改成前端網址
+    ],
     credentials: true,
   })
 );
