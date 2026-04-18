@@ -95,6 +95,14 @@
         </swiper-slide>
       </swiper>
     </div>
+    <div
+      v-else-if="workList?.data && workList.data.length === 0"
+      class="w-full py-20 flex flex-col items-center justify-center text-gray-500"
+    >
+      <el-empty description="再試試看其他款式吧！" :image-size="200" />
+    </div>
+
+    <div v-else class="w-full py-20 text-center text-gray-400">載入中...</div>
   </section>
 </template>
 
@@ -119,7 +127,7 @@ const priceRange = ref<(number | undefined)[]>([
 const { workList, selectedTag, selectedPrice, fetchWorks } = useWorks();
 
 onMounted(async () => {
-  await fetchWorks();
+  await fetchWorks(true);
   if (workList.value?.data) {
     tagList.value = [
       ...new Set(workList.value.data.flatMap((work) => work.tags || [])),
@@ -130,12 +138,12 @@ onMounted(async () => {
 
 const chooseTag = async (tag: string | undefined) => {
   selectedTag.value = tag;
-  await fetchWorks();
+  await fetchWorks(true);
 };
 
 const choosePrice = async (price: number | undefined) => {
   selectedPrice.value = price;
-  await fetchWorks();
+  await fetchWorks(true);
 };
 </script>
 

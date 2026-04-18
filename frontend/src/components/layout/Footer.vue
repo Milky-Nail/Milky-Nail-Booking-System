@@ -45,7 +45,9 @@
               >location_on</span
             >
             <address class="not-italic text-sm">
-              709臺南市安南區海佃路一段372巷45號1樓
+              <a href="https://reurl.cc/O65EmA" target="blank"
+                >709臺南市安南區海佃路一段372巷45號1樓</a
+              >
             </address>
           </div>
           <div class="flex items-center gap-2">
@@ -76,7 +78,7 @@ interface NavLink {
 }
 const links: NavLink[] = [
   { name: "Service and Fee", zh: "服務價目", to: "/service-and-fee" },
-  { name: "Gallery", zh: "作品一覽", to: "/gallery" },
+  { name: "Gallery", zh: "當月款式", to: "/gallery" },
   { name: "Notice", zh: "預約須知", to: "/notice" },
   { name: "About", zh: "關於我們", to: "/about" },
 ];

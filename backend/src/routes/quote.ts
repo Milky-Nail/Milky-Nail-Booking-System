@@ -1,13 +1,13 @@
 import Router from "express";
 import { QuoteRequestHandler } from "../controllers/quote.controller";
-import { isAdmin, authMiddleWare } from "../middlewares/auth.middleware";
+import { isAdmin, authenticate } from "../middlewares/auth.middleware";
 
 const router = Router();
 
-router.get("/", authMiddleWare, isAdmin, QuoteRequestHandler.getQuoteRquest);
+router.get("/", authenticate, isAdmin, QuoteRequestHandler.getQuoteRquest);
 router.post(
   "/update",
-  authMiddleWare,
+  authenticate,
   isAdmin,
   QuoteRequestHandler.updateQuoteRequest
 );

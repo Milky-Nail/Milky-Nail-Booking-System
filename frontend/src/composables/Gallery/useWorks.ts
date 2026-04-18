@@ -8,7 +8,7 @@ export const useWorks = () => {
   const selectedPage = ref<number | undefined>(undefined);
   const selsetdlimit = ref<number | undefined>(undefined);
 
-  const fetchWorks = async () => {
+  const fetchWorks = async (isFiltered: boolean) => {
     const res = await getWorks({
       tag: selectedTag.value,
       price: selectedPrice.value,
@@ -17,11 +17,14 @@ export const useWorks = () => {
         limit: selsetdlimit.value,
       },
     });
-
-    const filterData = res.data.filter(
-      (work: WorkData) => work.is_showed === true
-    );
-    workList.value = { ...res, data: filterData };
+    if (isFiltered) {
+      const filterData = res.data.filter(
+        (work: WorkData) => work.is_showed === true
+      );
+      workList.value = { ...res, data: filterData };
+    } else {
+      workList.value = res;
+    }
     return res;
   };
 
