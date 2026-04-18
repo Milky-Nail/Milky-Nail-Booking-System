@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173", // TODO:正式上線前要改成前端網址
+    origin: ["http://localhost:5173", "https://milky-nail-test.onrender.com"], // TODO:正式上線前要改成前端網址
     credentials: true,
   })
 );
