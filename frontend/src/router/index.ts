@@ -11,6 +11,7 @@ import LoginFailed from "../views/LoginFailed.vue";
 import Member from "../views/Member.vue";
 import OrderRecords from "../views/OrderRecords.vue";
 import Management from "../views/Management.vue";
+import { useUserStore } from "../stores/user";
 
 const routes = [
   {
@@ -27,26 +28,31 @@ const routes = [
     path: "/gallery",
     name: "Gallery",
     component: Gallery,
+    meta: { title: "當月款式" },
   },
   {
     path: "/appointment",
     name: "Appointment",
     component: Appointment,
+    meta: { title: "預約美甲" },
   },
   {
     path: "/notice",
     name: "Notice",
     component: Notice,
+    meta: { title: "預約須知" },
   },
   {
     path: "/about",
     name: "About",
     component: About,
+    meta: { title: "關於我們" },
   },
   {
     path: "/login",
     name: "Login",
     component: Login,
+    meta: { title: "登入" },
   },
   {
     path: "/login-failed",
@@ -57,16 +63,19 @@ const routes = [
     path: "/member",
     name: "Member",
     component: Member,
+    meta: { requiresAuth: true, title: "會員中心" },
   },
   {
     path: "/order-records",
     name: "OrderRecords",
     component: OrderRecords,
+    meta: { requiresAuth: true, title: "訂單紀錄" },
   },
   {
     path: "/management",
     name: "Management",
     component: Management,
+    meta: { requiresAdmin: true, title: "管理中心" },
   },
 ];
 
@@ -78,4 +87,34 @@ const router = createRouter({
   },
 });
 
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore();
+
+  // --- 設定瀏覽器標題邏輯 ---
+  const siteName = "MilkNail";
+  const pageTitle = to.meta.title as string;
+  document.title = pageTitle ? `${siteName} - ${pageTitle}` : siteName;
+
+  if (
+    userStore.isLoggedIn &&
+    (to.path === "/login" || to.path === "/register")
+  ) {
+    return next({ name: "HomePage" });
+  }
+  // 管理者
+  if (to.meta.requiresAdmin) {
+    if (userStore.isLoggedIn && userStore.userInfo?.role === "admin") {
+      next();
+    } else {
+      alert("請先登入帳號");
+      next(userStore.isLoggedIn ? { name: "HomePage" } : { name: "Login" });
+    }
+    // 會員
+  } else if (to.meta.requiresAuth && !userStore.isLoggedIn) {
+    alert("請先登入帳號");
+    next({ name: "Login" }); // 強制跳轉到登入頁
+  } else {
+    next();
+  }
+});
 export default router;

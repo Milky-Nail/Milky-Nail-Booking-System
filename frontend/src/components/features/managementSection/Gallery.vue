@@ -134,6 +134,7 @@ import {
 } from "../../../api/gallery";
 import { useUserStore } from "../../../stores/user";
 import { ElMessage } from "element-plus";
+import { useWorks } from "../../../composables/Gallery/useWorks";
 
 const userStore = useUserStore();
 const imageUrl = ref<string>("");
@@ -142,7 +143,7 @@ const price = ref<number>(0);
 const description = ref<string>("");
 const tags = ref<string[]>([]);
 const imageUploadRef = ref<InstanceType<typeof BaseUpload>>();
-const workList = ref<WorkResponse | null>(null);
+
 const currentPage = ref(1);
 const pageSize = 3;
 const currentPageData = computed(() => {
@@ -152,16 +153,10 @@ const currentPageData = computed(() => {
   return data.slice(start, end);
 });
 
-const fetchWorks = async () => {
-  const res = await getWorks({
-    tag: undefined,
-    price: undefined,
-    pagination: { page: undefined, limit: undefined },
-  });
-  workList.value = res;
-};
+const { workList, fetchWorks } = useWorks();
+
 onMounted(async () => {
-  await fetchWorks();
+  await fetchWorks(false);
 });
 
 const handleWorkImageSuccess = (res: UploadResponse) => {
@@ -171,7 +166,7 @@ const handleWorkImageSuccess = (res: UploadResponse) => {
 const handleShowing = async (id: string, status: boolean) => {
   await showWorkOrNot(id, status);
   ElMessage.success("狀態更改成功！");
-  fetchWorks();
+  fetchWorks(false);
 };
 const upload = async () => {
   if (!title.value || !price.value || !description.value || !imageUrl.value) {
@@ -195,7 +190,7 @@ const upload = async () => {
     description.value = "";
     tags.value = [];
     imageUploadRef.value?.clear();
-    fetchWorks();
+    fetchWorks(false);
     ElMessage.success("上傳成功！");
   } catch (err) {
     console.error("上傳過程發生錯誤：", err);

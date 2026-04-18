@@ -31,7 +31,7 @@ import { useWorks } from "../../../composables/Gallery/useWorks";
 
 const { workList, fetchWorks } = useWorks();
 onMounted(async () => {
-  await fetchWorks();
+  await fetchWorks(true);
 });
 
 const randomgallery = computed(() => {

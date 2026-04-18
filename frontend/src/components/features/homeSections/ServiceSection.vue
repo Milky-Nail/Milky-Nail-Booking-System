@@ -25,7 +25,7 @@
         </template>
 
         <template #image>
-          <RouterLink :to="service.path">
+          <RouterLink to="/service-and-fee">
             <img
               :src="service.icon_url"
               alt="示意圖"

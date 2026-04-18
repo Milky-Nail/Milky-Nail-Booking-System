@@ -2,13 +2,16 @@
   <el-upload
     ref="uploadRef"
     :action="uploadUrl"
+    :with-credentials="true"
     :on-success="handleSuccess"
     :on-error="handleError"
     :before-upload="beforeUpload"
     :limit="limit"
     :list-type="listType"
+    :on-remove="handleRemove"
     name="file"
   >
+    <!-- el-upload跨域請求不會攜帶 Cookie 所以需要寫with-credentials，不然設中間件會被擋掉-->
     <template #trigger>
       <el-icon class="mr-1"><Plus /></el-icon>
     </template>
@@ -28,7 +31,7 @@ const props = defineProps({
   listType: { type: String, default: "picture-card" },
 });
 
-const emit = defineEmits(["upload-success", "upload-error"]);
+const emit = defineEmits(["upload-success", "upload-error", "upload-remove"]);
 const clear = () => {
   if (uploadRef.value) {
     uploadRef.value.clearFiles();
@@ -41,25 +44,47 @@ const handleSuccess = (res: any) => {
   emit("upload-success", res);
 };
 
-const handleError = () => {
-  ElMessage.error("上傳失敗，請稍後再試");
+const handleError = (error: any) => {
+  if (error?.status === 429) {
+    ElMessage.error("上傳太頻繁，請稍後再試");
+  } else {
+    ElMessage.error("上傳失敗，請稍後再試");
+  }
   emit("upload-error");
 };
 
 const beforeUpload = (rawFile: UploadRawFile) => {
-  const isJPGorPNG =
-    rawFile.type === "image/jpeg" || rawFile.type === "image/png";
-  const isLt2M = rawFile.size / 1024 / 1024 < 2;
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/heic",
+    "image/heif",
+  ];
+  const isAllowedFormat = allowedTypes.includes(rawFile.type);
+  const fileName = rawFile.name.toLowerCase();
+  const isHEIC = fileName.endsWith(".heic") || fileName.endsWith(".heif");
+  const maxSize = 5;
+  const isLtSize = rawFile.size / 1024 / 1024 < maxSize;
 
-  if (!isJPGorPNG) {
-    ElMessage.error("只能上傳 JPG 或 PNG 格式圖片");
+  if (!isAllowedFormat && !isHEIC) {
+    ElMessage.error("僅支援 JPG, PNG, WebP 或 iPhone HEIC 格式圖片");
     return false;
   }
-  if (!isLt2M) {
-    ElMessage.error("圖片大小不能超過 2MB!");
+
+  if (!isLtSize) {
+    ElMessage.warning(
+      `照片太大囉 (${(rawFile.size / 1024 / 1024).toFixed(
+        1
+      )}MB)，請選擇 5MB 以下的照片或先進行截圖再上傳。`
+    );
     return false;
   }
+
   return true;
+};
+const handleRemove = () => {
+  emit("upload-remove");
 };
 </script>
 <style scoped>

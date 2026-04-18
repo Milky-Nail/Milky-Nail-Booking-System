@@ -97,10 +97,12 @@
           上傳詢價參考圖
         </h3>
         <BaseUpload
+          ref="baseUploadRef"
           :upload-url="UPLOAD_URL"
           :limit="1"
           list-type="picture-card"
           @upload-success="handleQuoteImageSuccess"
+          @upload-remove="handleQuoteImageRemove"
         />
 
         <el-input
@@ -153,7 +155,6 @@ const confirmSection = ref<HTMLElement | null>(null);
 const userId = computed(() => userStore.userInfo?.id);
 const quoteImageUrl = ref<string>("");
 const quoteDescription = ref<string>("");
-
 onMounted(() => {
   appointmentStore.clearAll();
 });
@@ -302,5 +303,8 @@ const hasQuoteService = computed(() => {
 
 const handleQuoteImageSuccess = (res: UploadResponse) => {
   quoteImageUrl.value = res.url;
+};
+const handleQuoteImageRemove = () => {
+  quoteImageUrl.value = "";
 };
 </script>
