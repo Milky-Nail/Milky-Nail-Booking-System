@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { PrismaClient } from "../generated/prisma/index.js";
 import { appointment_status, quote_status } from "../generated/prisma/index.js";
 import { pushAppointmentNotification } from "./lineMessage.service.js";
 
@@ -13,6 +14,7 @@ export interface AppointmentAddon {
   addon_id: number;
   price_snapshot: number;
   duration_snapshot: number;
+  quantity: number;
 }
 export interface Addon {
   id: number;
@@ -245,14 +247,16 @@ const AppointmentService = {
 
     data.appointment_items.forEach((item) => {
       // 計算服務項目（service_price）
-      const dbPrice = dbPrices.find((p) => p.id === item.service_price_id);
+      const dbPrice = dbPrices.find(
+        (p: DBPrice) => p.id === item.service_price_id
+      );
       if (!dbPrice) throw new Error(`無效價格：${item.service_price_id}`);
 
       expectedTotalPrice += dbPrice.price;
       expectedTotalDuration += dbPrice.services?.duration_minutes || 0;
 
       // 計算該項目下的加購項目（appointment_addons）
-      (item.appointment_addons || []).forEach((addon) => {
+      (item.appointment_addons || []).forEach((addon: AppointmentAddon) => {
         const dbAddon = dbAddons.find((a) => a.id === addon.addon_id);
         if (!dbAddon) throw new Error(`無效的加價項目：${addon.addon_id}`);
 
@@ -286,69 +290,81 @@ const AppointmentService = {
       throw new Error("日期格式錯誤，無法解析時間");
     }
 
-    const newAppointment = await prisma.$transaction(async (tx) => {
-      // 檢查時段衝突
-      const conflict = await tx.appointments.findFirst({
-        where: {
-          staff_id: data.staff_id,
-          status: { not: "cancelled" },
-          start_time: { lt: endDate },
-          end_time: { gt: startDate },
-        },
-      });
-
-      if (conflict) throw new Error("該時段美甲師已被預約");
-
-      // 建立預約主表與項目清單
-      const appointment = await tx.appointments.create({
-        data: {
-          start_time: startDate,
-          end_time: endDate,
-          total_price: data.total_price,
-          staff_id: BigInt(data.staff_id),
-          user_id: data.user_id ? BigInt(data.user_id) : null,
-          note: data.note,
-          status: data.status,
-          appointment_items: {
-            create: data.appointment_items.map((item) => ({
-              service_id: Number(item.service_id),
-              service_price_id: Number(item.service_price_id),
-              price_snapshot: Number(item.price_snapshot),
-              duration_snapshot: Number(item.duration_snapshot),
-              appointment_addons: {
-                create: (item.appointment_addons || []).map((addon) => ({
-                  addon_id: Number(addon.addon_id),
-                  price_snapshot: Number(addon.price_snapshot),
-                  duration_snapshot: Number(addon.duration_snapshot),
-                  quantity: Number(addon.quantity || 1),
-                })),
-              },
-            })),
-          },
-        },
-        include: {
-          appointment_items: {
-            include: { appointment_addons: true },
-          },
-        },
-      });
-
-      // 如果有詢價需求，手動建立並連結 appointment_id
-      if (data.quote_request && data.quote_request.image_url) {
-        await tx.quote_requests.create({
-          data: {
-            user_id: data.user_id ? BigInt(data.user_id) : null,
-            staff_id: BigInt(data.staff_id),
-            image_url: data.quote_request.image_url,
-            description: data.quote_request.description || "",
-            status: "pending",
-            appointment_id: appointment.id,
+    const newAppointment = await prisma.$transaction(
+      async (
+        tx: Omit<
+          PrismaClient,
+          | "$connect"
+          | "$disconnect"
+          | "$on"
+          | "$transaction"
+          | "$use"
+          | "$extends"
+        >
+      ) => {
+        // 檢查時段衝突
+        const conflict = await tx.appointments.findFirst({
+          where: {
+            staff_id: data.staff_id,
+            status: { not: "cancelled" },
+            start_time: { lt: endDate },
+            end_time: { gt: startDate },
           },
         });
-      }
 
-      return appointment;
-    });
+        if (conflict) throw new Error("該時段美甲師已被預約");
+
+        // 建立預約主表與項目清單
+        const appointment = await tx.appointments.create({
+          data: {
+            start_time: startDate,
+            end_time: endDate,
+            total_price: data.total_price,
+            staff_id: BigInt(data.staff_id),
+            user_id: data.user_id ? BigInt(data.user_id) : null,
+            note: data.note,
+            status: data.status,
+            appointment_items: {
+              create: data.appointment_items.map((item) => ({
+                service_id: Number(item.service_id),
+                service_price_id: Number(item.service_price_id),
+                price_snapshot: Number(item.price_snapshot),
+                duration_snapshot: Number(item.duration_snapshot),
+                appointment_addons: {
+                  create: (item.appointment_addons || []).map((addon) => ({
+                    addon_id: Number(addon.addon_id),
+                    price_snapshot: Number(addon.price_snapshot),
+                    duration_snapshot: Number(addon.duration_snapshot),
+                    quantity: Number(addon.quantity || 1),
+                  })),
+                },
+              })),
+            },
+          },
+          include: {
+            appointment_items: {
+              include: { appointment_addons: true },
+            },
+          },
+        });
+
+        // 如果有詢價需求，手動建立並連結 appointment_id
+        if (data.quote_request && data.quote_request.image_url) {
+          await tx.quote_requests.create({
+            data: {
+              user_id: data.user_id ? BigInt(data.user_id) : null,
+              staff_id: BigInt(data.staff_id),
+              image_url: data.quote_request.image_url,
+              description: data.quote_request.description || "",
+              status: "pending",
+              appointment_id: appointment.id,
+            },
+          });
+        }
+
+        return appointment;
+      }
+    );
 
     // 發送 LINE 通知
     const lineId = data.line_id;
