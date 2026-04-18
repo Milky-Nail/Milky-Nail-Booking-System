@@ -16,7 +16,7 @@ const lineInit = (req: Request, res: Response) => {
   res.cookie("line_auth_state", state, {
     httpOnly: true, //防XSS
     secure: process.env.NODE_ENV !== "development",
-    sameSite: "none",
+    sameSite: "lax",
     maxAge: 5 * 60 * 1000,
     path: "/",
   });
@@ -31,7 +31,7 @@ const lineCallback = async (req: Request, res: Response) => {
 
   res.clearCookie("line_auth_state", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV !== "development",
     sameSite: "lax",
     path: "/",
   });
@@ -59,7 +59,7 @@ const lineCallback = async (req: Request, res: Response) => {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       secure: process.env.NODE_ENV !== "development",
-      sameSite: "none",
+      sameSite: "lax",
     });
     res.redirect(`${process.env.FRONTEND_URL}/home`);
   } catch (err) {
@@ -87,7 +87,7 @@ const googleCallback = [
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       secure: process.env.NODE_ENV !== "development",
-      sameSite: "none",
+      sameSite: "lax",
     });
     res.redirect(`${process.env.FRONTEND_URL}/home`);
   },
