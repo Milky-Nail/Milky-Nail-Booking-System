@@ -14,6 +14,19 @@ export interface AppointmentAddon {
   price_snapshot: number;
   duration_snapshot: number;
 }
+export interface Addon {
+  id: number;
+  price: number;
+  name: string;
+  duration_minutes: number;
+  allow_quantity: boolean;
+}
+interface DBPrice {
+  id: number;
+  services: {
+    name: string;
+  } | null;
+}
 export interface AppointmentItemInput {
   service_id: number;
   service_price_id: number;
@@ -341,12 +354,15 @@ const AppointmentService = {
     const lineId = data.line_id;
     if (lineId) {
       const bookingItems = data.appointment_items.map((item) => {
-        const dbPrice = dbPrices.find((p) => p.id === item.service_price_id);
+        const dbPrice = dbPrices.find(
+          (p: DBPrice) => p.id === item.service_price_id
+        );
         return {
           service_name: dbPrice?.services?.name || "未知服務",
           addons: (item.appointment_addons || []).map((addon) => ({
             name:
-              dbAddons.find((a) => a.id === addon.addon_id)?.name || "未知加購",
+              dbAddons.find((a: Addon) => a.id === addon.addon_id)?.name ||
+              "未知加購",
             quantity: addon.quantity || 1,
           })),
         };
