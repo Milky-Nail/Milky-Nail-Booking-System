@@ -2,7 +2,7 @@ import apiClient from "../../api/client";
 
 export const loginWithLine = async () => {
   const data = await apiClient.post(
-    `${import.meta.env.VITE_API_BASE_URL}/auth/line/init`,
+    `auth/line/init`,
     {},
     { withCredentials: true }
   );
