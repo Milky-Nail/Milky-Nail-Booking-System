@@ -35,7 +35,6 @@ const SchedulesHandler = {
         message: `成功匯入 ${result.count} 筆班表資料`,
       });
     } catch (err) {
-      console.error("Upload Error:", err); //TODO:記得刪
       return res.status(500).json({ message: "伺服器錯誤" });
     }
   },

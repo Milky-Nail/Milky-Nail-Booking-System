@@ -145,7 +145,6 @@ const getAppointmentByUser = async (
         },
       }
     )) as unknown as UserAppointmentList[];
-    console.log(res); //TODO:記得刪
     return res;
   } catch (err) {
     console.error("無法取得預約資料:", err);

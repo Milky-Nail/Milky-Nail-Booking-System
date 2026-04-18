@@ -170,7 +170,6 @@ const openStylist = async () => {
 };
 
 const handleStylistUpdate = async (data: Staff) => {
-  console.log("接收到子組件傳來的美甲師資料：", data); //TODO:記得刪掉
   appointmentStore.parentStylist = data;
   await nextTick(); //確保DOM更新完成，不然滑下去會找不到
   timeSection.value?.scrollIntoView({
@@ -181,7 +180,6 @@ const handleStylistUpdate = async (data: Staff) => {
 };
 
 const handleDateTimeUpdate = async (data: TimeSlot) => {
-  console.log("接收到子組件傳來的預約時間資料：", data); //TODO:記得刪掉
   appointmentStore.parentTime = data;
   await nextTick(); //確保DOM更新完成，不然滑下去會找不到
   confirmSection.value?.scrollIntoView({
@@ -286,7 +284,6 @@ const confirm = async () => {
 };
 
 const handleAppointmentUpdate = (data: Select[]) => {
-  console.log("接收到子組件傳來的預約項目資料：", data); //TODO:記得刪掉
   appointmentStore.parentAppointmentList = data;
   if (data.length === 0) {
     appointmentStore.parentTime = null;

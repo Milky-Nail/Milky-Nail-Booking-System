@@ -141,7 +141,6 @@ const AppointmentService = {
   },
 
   async getAppointmentByStaff(filters: { staff_id: number; date: string }) {
-    console.log("後端收到的查詢參數:", filters); //TODO:記得刪
     const { staff_id, date } = filters;
     let where = {
       status: { not: "cancelled" as appointment_status }, //枚舉屬性需要引入appointment_status宣告屬性為Enum
@@ -173,7 +172,6 @@ const AppointmentService = {
   },
 
   async getAppointmentByUser(filters: { user_id: number }) {
-    console.log("後端收到的查詢參數:", filters); //TODO:記得刪
     const { user_id } = filters;
 
     return await prisma.appointments.findMany({
@@ -379,7 +377,6 @@ const AppointmentService = {
     const oneWeek = 7 * 24 * 60 * 60 * 1000;
     const now = Date.now();
     if (startDate - now < oneWeek) {
-      console.log("取消預約須於一週前"); //TODO:記得刪
       throw new Error("取消預約須於一週前");
     }
     try {

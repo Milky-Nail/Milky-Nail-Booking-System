@@ -40,7 +40,7 @@ const AppointmentHandler = {
         staff_id: parsedStaffId as number,
         date: date as string,
       });
-      console.log(data); //TODO:記得刪掉
+
       return res.json(data);
     } catch (err) {
       res.status(500).json({ message: "server error", err });
@@ -59,7 +59,7 @@ const AppointmentHandler = {
       const data = await AppointmentService.getAppointmentByUser({
         user_id: parsedUserId as number,
       });
-      console.log(data); //TODO:記得刪掉
+
       return res.json(data);
     } catch (err) {
       res.status(500).json({ message: "server error", err });
