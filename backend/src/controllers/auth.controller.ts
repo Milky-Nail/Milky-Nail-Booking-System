@@ -38,16 +38,16 @@ const lineCallback = async (req: Request, res: Response) => {
 
   if (error) {
     console.log("使用者取消LINE授權:", error);
-    return res.redirect(`${process.env.FRONTEND_URL}/login`);
+    return res.redirect(`/login`);
   }
 
   if (!state || !savedState || state !== savedState) {
     console.error("State驗證失敗，可能發生CSRF攻擊");
-    return res.redirect(`${process.env.FRONTEND_URL}/login-failed`);
+    return res.redirect(`/login-failed`);
   }
 
   if (!code) {
-    return res.redirect(`${process.env.FRONTEND_URL}/login-failed`);
+    return res.redirect(`/login-failed`);
   }
 
   try {
@@ -61,10 +61,10 @@ const lineCallback = async (req: Request, res: Response) => {
       secure: process.env.NODE_ENV !== "development",
       sameSite: "lax",
     });
-    res.redirect(`${process.env.FRONTEND_URL}/home`);
+    res.redirect(`/home`);
   } catch (err) {
     console.error("LINE Login Error:", err);
-    res.redirect(`${process.env.FRONTEND_URL}/login-failed`);
+    res.redirect(`/login-failed`);
   }
 };
 
@@ -77,7 +77,7 @@ const googleCallback = [
   passport.authenticate("google", {
     scope: ["profile", "email"],
     session: false,
-    failureRedirect: `${process.env.FRONTEND_URL}/login-failed`,
+    failureRedirect: `/login-failed`,
   }),
   (req: Request, res: Response) => {
     const user = req.user as users;

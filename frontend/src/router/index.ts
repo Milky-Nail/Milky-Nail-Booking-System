@@ -87,7 +87,7 @@ const router = createRouter({
   },
 });
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach(async (to) => {
   const userStore = useUserStore();
 
   // --- 設定瀏覽器標題邏輯 ---
@@ -99,22 +99,22 @@ router.beforeEach((to, _from, next) => {
     userStore.isLoggedIn &&
     (to.path === "/login" || to.path === "/register")
   ) {
-    return next({ name: "HomePage" });
+    return { name: "Home" };
   }
   // 管理者
   if (to.meta.requiresAdmin) {
     if (userStore.isLoggedIn && userStore.userInfo?.role === "admin") {
-      next();
+      return true;
     } else {
-      alert("請先登入帳號");
-      next(userStore.isLoggedIn ? { name: "HomePage" } : { name: "Login" });
+      alert("權限不足或請先登入");
+      return userStore.isLoggedIn ? { name: "Home" } : { name: "Login" };
     }
     // 會員
   } else if (to.meta.requiresAuth && !userStore.isLoggedIn) {
     alert("請先登入帳號");
-    next({ name: "Login" }); // 強制跳轉到登入頁
+    return { name: "Login" };
   } else {
-    next();
+    return true;
   }
 });
 export default router;

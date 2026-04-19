@@ -9,7 +9,6 @@ const UserHandler = {
       if (!user) {
         return res.status(404).json({ message: "找不到使用者" });
       }
-
       res.json({
         ...user,
         id: user.id.toString(),

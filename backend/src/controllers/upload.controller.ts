@@ -11,8 +11,9 @@ export const handleFileUpload = async (req: Request, res: Response) => {
     fs.unlinkSync(req.file!.path);
 
     return res.status(200).json({
-      url: result.secure_url,
+      url: result.optimized_url,
       public_id: result.public_id,
+      original_url: result.secure_url,
     });
   } catch (err) {
     console.error("上傳失敗：", err);

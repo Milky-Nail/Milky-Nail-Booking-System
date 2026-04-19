@@ -17,6 +17,8 @@ export const useUserStore = defineStore("user", () => {
   const isLoggedIn = computed(() => !!userInfo.value);
 
   const fetchUserProfile = async () => {
+    const loggedIn = localStorage.getItem("is_logged_in");
+    if (!loggedIn) return;
     try {
       const data = await getUserProfile();
       userInfo.value = data as unknown as UserInfo;

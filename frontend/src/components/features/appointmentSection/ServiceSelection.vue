@@ -63,7 +63,14 @@
         </DetailServiceCard>
       </div>
     </Transition>
-    <el-dialog v-model="dialogVisible" @close="!selectedService" teleported>
+    <el-dialog
+      append-to-body
+      :lock-scroll="false"
+      v-model="dialogVisible"
+      width="70%"
+      @close="!selectedService"
+      teleported
+    >
       <template v-if="selectedService">
         <div class="overflow-y-auto max-h-[50vh] pr-1">
           <h2>{{ selectedService.name }}</h2>

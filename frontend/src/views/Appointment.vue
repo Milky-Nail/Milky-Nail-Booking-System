@@ -7,7 +7,7 @@
       class="my-5 w-full text-center font-chiron text-gray-600 hover:cursor-pointer mb-20 hover:bg-secondary"
       @click="openStylist"
     >
-      選擇美甲師
+      確認預約項目，下一步！
     </button>
     <div ref="stylistSection" class="scroll-mt-25">
       <StylistSelection

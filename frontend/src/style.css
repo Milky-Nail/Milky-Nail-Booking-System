@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@200..900&family=Noto+Serif+TC:wght@200..900&family=Noto+Sans+TC:wght@100..900&display=swap");
 @import "tailwindcss";
 @theme {
   --color-primary: #e8306e;
