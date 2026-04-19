@@ -1,11 +1,11 @@
 <template>
   <section class="p-4 font-serif">
     <div class="text-2xl font-bold">傳圖詢價確認</div>
-    <div class="flex justify-center items-center gap-5 mt-5">
+    <div class="flex flex-wrap justify-center items-center gap-5 mt-5">
       <div
         v-for="quote in recentQuoteRequest?.data"
         :key="quote.id"
-        class="w-1/4"
+        class="w-full md:w-1/3 lg:w-1/4"
       >
         <el-card>
           <template #header>

@@ -3,11 +3,12 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
       <div class="relative group">
         <Swiper
+          v-if="workList?.data?.length"
           :slidesPerView="1"
           :spaceBetween="0"
           :pagination="false"
           :navigation="false"
-          :loop="true"
+          :loop="(workList?.data?.length ?? 0) > 1"
           :autoplay="{
             delay: 3500,
             disableOnInteraction: false,
@@ -85,6 +86,6 @@ import "swiper/swiper-bundle.css";
 const modules = [Navigation, Pagination, Autoplay];
 const { workList, fetchWorks } = useWorks();
 onMounted(async () => {
-  fetchWorks(true);
+  await fetchWorks(true);
 });
 </script>

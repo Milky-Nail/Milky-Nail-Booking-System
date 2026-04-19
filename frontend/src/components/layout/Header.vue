@@ -1,13 +1,13 @@
 <template>
   <header
-    class="main-header fixed inset-x-0 top-0 z-50 bg-secondary text-white"
+    class="main-header fixed inset-x-0 top-0 z-10000 bg-secondary text-white pt-[env(safe-area-inset-top)]"
   >
     <div class="h-20">
       <div class="relative flex h-full items-center justify-between px-4">
         <RouterLink to="/home" class="flex gap-2 items-center">
           <img
             class="w-10 h-10 rounded-full object-cover"
-            src="https://res.cloudinary.com/dsjw5wnvg/image/upload/v1776184355/logo_gxzpph.jpg"
+            src="https://res.cloudinary.com/dsjw5wnvg/image/upload//f_auto,q_auto/v1776184355/logo_gxzpph.jpg"
             alt="logo"
           />
           <h2 class="text-black inline font-black text-3xl">Milky</h2>
@@ -43,7 +43,7 @@
                 class="w-10 h-10 rounded-full object-cover"
                 :src="
                   avatarUrl ??
-                  'https://res.cloudinary.com/dsjw5wnvg/image/upload/v1776184355/logo_gxzpph.jpg'
+                  'https://res.cloudinary.com/dsjw5wnvg/image/upload//f_auto,q_auto/v1776184355/logo_gxzpph.jpg'
                 "
                 alt="avatar"
               />

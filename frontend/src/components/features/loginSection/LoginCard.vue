@@ -1,7 +1,7 @@
 <template>
   <section class="w-full">
     <div
-      class="bg-[url(https://res.cloudinary.com/dsjw5wnvg/image/upload/v1772124541/close-up-client-manicure-appointment_gtcswk.jpg)] min-h-screen bg-cover bg-center flex justify-center items-center text-white transition-transform duration-500 hover:scale-101"
+      class="bg-[url(https://res.cloudinary.com/dsjw5wnvg/image/upload/f_auto,q_auto/v1772124541/close-up-client-manicure-appointment_gtcswk.jpg)] min-h-screen bg-cover bg-center flex justify-center items-center text-white transition-transform duration-500 hover:scale-101"
     >
       <div
         class="flex flex-col justify-center items-center gap-8 bg-white/20 backdrop-blur-sm hover:backdrop-blur-md transition-all duration-500 rounded-2xl p-6 md:p-10 w-8/9 lg:w-1/3 xl:w-1/4"

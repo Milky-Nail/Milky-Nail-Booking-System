@@ -5,7 +5,7 @@
         <div class="flex justify-center md:justify-start items-center gap-1.5">
           <img
             class="w-10 h-10 rounded-full object-cover"
-            src="https://res.cloudinary.com/dsjw5wnvg/image/upload/v1776184355/logo_gxzpph.jpg"
+            src="https://res.cloudinary.com/dsjw5wnvg/image/upload//f_auto,q_auto/v1776184355/logo_gxzpph.jpg"
             alt="logo"
           />
           <h4 class="text-black inline font-black text-3xl">Milky</h4>
