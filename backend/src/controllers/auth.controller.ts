@@ -89,7 +89,7 @@ const googleCallback = [
       secure: process.env.NODE_ENV !== "development",
       sameSite: "lax",
     });
-    res.redirect(`${process.env.FRONTEND_URL}/home`);
+    res.redirect(`/home`);
   },
 ];
 
