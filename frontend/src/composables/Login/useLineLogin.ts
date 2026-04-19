@@ -1,6 +1,7 @@
 import apiClient from "../../api/client";
 
 export const loginWithLine = async () => {
+  localStorage.setItem("is_logged_in", "true");
   const data = await apiClient.post(
     `auth/line/init`,
     {},
