@@ -1,6 +1,6 @@
 <template>
   <header
-    class="main-header fixed inset-x-0 top-0 z-10000 bg-secondary text-white pt-[env(safe-area-inset-top)]"
+    class="main-header fixed inset-x-0 top-0 z-2000 bg-secondary text-white pt-[env(safe-area-inset-top)]"
   >
     <div class="h-20">
       <div class="relative flex h-full items-center justify-between px-4">

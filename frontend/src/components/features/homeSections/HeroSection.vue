@@ -19,7 +19,7 @@
           >專業服務 × 舒適體驗</span
         >
         <span
-          class="mx-auto md:ml-5 mt-5 font-serif lg:text-2xl md:text-lg text-sm font-bold text-primary bg-[#D95F76]/50 px-4 py-2 rounded-2xl w-fit"
+          class="mx-auto md:ml-5 mt-5 font-serif lg:text-2xl md:text-lg text-sm font-bold text-white bg-[#D95F76]/50 px-4 py-2 rounded-2xl w-fit"
         >
           現在就讓指尖升級你的日常質感
         </span>

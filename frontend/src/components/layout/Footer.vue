@@ -18,8 +18,18 @@
           <div
             class="flex justify-center items-center md:justify-start mt-5 text-primary"
           >
-            <font-awesome-icon :icon="['fab', 'facebook']" size="2x" />
-            <font-awesome-icon :icon="['fab', 'instagram']" size="2x" />
+            <a
+              href="https://www.facebook.com/profile.php?id=61581453082012"
+              target="blank"
+            >
+              <font-awesome-icon :icon="['fab', 'facebook']" size="2x" />
+            </a>
+            <a
+              href="https://www.instagram.com/milkynail_studio/"
+              target="blank"
+            >
+              <font-awesome-icon :icon="['fab', 'instagram']" size="2x" />
+            </a>
           </div>
         </div>
       </div>
