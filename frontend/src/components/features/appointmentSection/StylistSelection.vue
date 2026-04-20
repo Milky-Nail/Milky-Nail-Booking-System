@@ -30,11 +30,11 @@
 import StylistCard from "../../common/cards/StylistCard.vue";
 import { ref, onMounted } from "vue";
 import { getStaff, type Staff } from "../../../api/staff";
-
+import { useAppointmentStore } from "../../../stores/appointment";
 const staffList = ref<Staff[] | null>([]);
 const loading = ref(true);
 const chosenStylist = ref<Staff | null>(null);
-
+const appointmentStore = useAppointmentStore();
 const emit = defineEmits(["update-stylist"]);
 
 onMounted(async () => {
@@ -47,6 +47,7 @@ onMounted(async () => {
 });
 
 const chooseStylist = (staff: Staff) => {
+  appointmentStore.parentTime = null;
   chosenStylist.value = staff;
   emit("update-stylist", chosenStylist.value);
 };

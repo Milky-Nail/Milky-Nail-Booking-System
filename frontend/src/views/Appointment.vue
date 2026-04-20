@@ -1,14 +1,16 @@
 <template>
   <div>
     <ServiceSelection @update-appointment="handleAppointmentUpdate" />
-    <button
-      type="button"
-      v-if="appointmentStore.parentAppointmentList[0]"
-      class="my-5 w-full text-center font-chiron text-gray-600 hover:cursor-pointer mb-20 hover:bg-secondary"
-      @click="openStylist"
-    >
-      確認預約項目，下一步！
-    </button>
+    <div class="flex justify-center">
+      <el-button
+        type="danger"
+        v-if="appointmentStore.parentAppointmentList[0]"
+        @click="openStylist"
+        class="mt-5 mb-20"
+      >
+        確認預約項目，下一步！
+      </el-button>
+    </div>
     <div ref="stylistSection" class="scroll-mt-25">
       <StylistSelection
         @update-stylist="handleStylistUpdate"
@@ -275,11 +277,10 @@ const confirm = async () => {
   } catch (error) {
     ElMessage({
       showClose: true,
-      message: "預約失敗",
+      message: "預約失敗，美甲師時間對不上，要不要換換其他美甲師呢？",
       type: "error",
       duration: 3000,
     });
-    console.error("預約失敗");
   }
 };
 
@@ -304,4 +305,6 @@ const handleQuoteImageSuccess = (res: UploadResponse) => {
 const handleQuoteImageRemove = () => {
   quoteImageUrl.value = "";
 };
+
+const stylist = appointmentStore.parentStylist;
 </script>

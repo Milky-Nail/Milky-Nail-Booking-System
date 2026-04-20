@@ -65,7 +65,7 @@
     </Transition>
     <el-dialog
       append-to-body
-      :lock-scroll="false"
+      lock-scroll
       v-model="dialogVisible"
       width="70%"
       @close="!selectedService"

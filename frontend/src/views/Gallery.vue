@@ -43,6 +43,7 @@
       v-if="workList?.data && workList.data.length > 0"
     >
       <swiper
+        v-if="workList.data"
         :key="
           workList.data.length + (selectedTag || '') + (selectedPrice || '')
         "
