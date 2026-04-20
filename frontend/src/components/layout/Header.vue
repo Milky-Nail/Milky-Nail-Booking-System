@@ -4,7 +4,7 @@
   >
     <div class="h-20">
       <div class="relative flex h-full items-center justify-between px-4">
-        <RouterLink to="/home" class="flex gap-2 items-center">
+        <RouterLink to="/" class="flex gap-2 items-center">
           <img
             class="w-10 h-10 rounded-full object-cover"
             src="https://res.cloudinary.com/dsjw5wnvg/image/upload//f_auto,q_auto/v1776184355/logo_gxzpph.jpg"

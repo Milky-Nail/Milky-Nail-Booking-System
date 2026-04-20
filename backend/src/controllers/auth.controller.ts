@@ -61,7 +61,7 @@ const lineCallback = async (req: Request, res: Response) => {
       secure: process.env.NODE_ENV !== "development",
       sameSite: "lax",
     });
-    res.redirect(`/home`);
+    res.redirect(`/`);
   } catch (err) {
     console.error("LINE Login Error:", err);
     res.redirect(`/login-failed`);
@@ -89,7 +89,7 @@ const googleCallback = [
       secure: process.env.NODE_ENV !== "development",
       sameSite: "lax",
     });
-    res.redirect(`/home`);
+    res.redirect(`/`);
   },
 ];
 
