@@ -305,6 +305,4 @@ const handleQuoteImageSuccess = (res: UploadResponse) => {
 const handleQuoteImageRemove = () => {
   quoteImageUrl.value = "";
 };
-
-const stylist = appointmentStore.parentStylist;
 </script>
