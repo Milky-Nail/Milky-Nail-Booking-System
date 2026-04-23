@@ -289,14 +289,26 @@ const AppointmentService = {
 
       if (conflict) throw new Error("該時段美甲師已被預約");
       // 檢查美甲師時間是否真的可以
+
+      const offsetMs = 8 * 60 * 60 * 1000;
       const isAvailable = await tx.schedules.findFirst({
         where: {
-          staff_id: data.staff_id,
-          start_time: { lt: startDate },
-          end_time: { gt: endDate },
+          staff_id: Number(data.staff_id),
+          start_time: {
+            lte: new Date(new Date(startDate).getTime() + offsetMs),
+          },
+          end_time: { gte: new Date(new Date(endDate).getTime() + offsetMs) },
+          status: "active",
         },
       });
-      if (!isAvailable) throw new Error("該時段美甲師不在班或已請假");
+      if (!isAvailable) {
+        console.log("查詢失敗，參數為:", {
+          searchStart: new Date(startDate).toISOString(),
+          searchEnd: new Date(endDate).toISOString(),
+          staffId: data.staff_id,
+        });
+        throw new Error("該時段美甲師不在班或已請假");
+      }
 
       // 建立預約主表與項目清單
       const appointment = await tx.appointments.create({

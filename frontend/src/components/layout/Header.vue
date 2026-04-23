@@ -7,7 +7,7 @@
         <RouterLink to="/" class="flex gap-2 items-center">
           <img
             class="w-10 h-10 rounded-full object-cover"
-            src="https://res.cloudinary.com/dsjw5wnvg/image/upload//f_auto,q_auto/v1776184355/logo_gxzpph.jpg"
+            src="https://res.cloudinary.com/dsjw5wnvg/image/upload/f_auto,q_auto/v1776184355/logo_gxzpph.jpg"
             alt="logo"
           />
           <h2 class="text-black inline font-black text-3xl">Milky</h2>
