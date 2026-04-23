@@ -302,11 +302,6 @@ const AppointmentService = {
         },
       });
       if (!isAvailable) {
-        console.log("查詢失敗，參數為:", {
-          searchStart: new Date(startDate).toISOString(),
-          searchEnd: new Date(endDate).toISOString(),
-          staffId: data.staff_id,
-        });
         throw new Error("該時段美甲師不在班或已請假");
       }
 
@@ -377,7 +372,7 @@ const AppointmentService = {
       });
 
       pushAppointmentNotification(lineId, {
-        start_time: startDate,
+        start_time: new Date(new Date(startDate).getTime()),
         appointment_items: bookingItems,
       }).catch((err) => console.error("LINE 通知失敗:", err));
     }

@@ -49,14 +49,14 @@ export const pushAppointmentNotification = async (
 ) => {
   if (!lineId) return;
 
-  const formattedTime = new Date(data.start_time).toLocaleString("zh-TW", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+  // const formattedTime = new Date(data.start_time);
+  const d = new Date(data.start_time);
+  const twTime = new Date(d.getTime() + 8 * 60 * 60 * 1000);
+  const formattedTime = `${twTime.getUTCFullYear()}/${String(
+    twTime.getUTCMonth() + 1
+  ).padStart(2, "0")}/${String(twTime.getUTCDate()).padStart(2, "0")} ${String(
+    twTime.getUTCHours()
+  ).padStart(2, "0")}:${String(twTime.getUTCMinutes()).padStart(2, "0")}`;
   const itemContents: FlexComponent[] = [];
   data.appointment_items.forEach((item) => {
     itemContents.push({
@@ -155,18 +155,13 @@ export const pushQuoteNotification = async (
   quote: QuoteRequest
 ) => {
   if (!lineId) return;
-
-  const formattedTime = new Date(quote.appointments.start_time).toLocaleString(
-    "zh-TW",
-    {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }
-  );
+  const d = new Date(quote.appointments.start_time);
+  const twTime = new Date(d.getTime() + 8 * 60 * 60 * 1000);
+  const formattedTime = `${twTime.getUTCFullYear()}/${String(
+    twTime.getUTCMonth() + 1
+  ).padStart(2, "0")}/${String(twTime.getUTCDate()).padStart(2, "0")} ${String(
+    twTime.getUTCHours()
+  ).padStart(2, "0")}:${String(twTime.getUTCMinutes()).padStart(2, "0")}`;
   const flexContainer: any = {
     type: "bubble",
     body: {
