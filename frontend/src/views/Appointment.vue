@@ -161,7 +161,7 @@ onMounted(() => {
   if (!userStore.isLoggedIn) {
     ElMessage({
       showClose: true,
-      message: "請先登入，登入後再服務項目！",
+      message: "請先登入，登入後再選擇服務項目！",
       type: "warning",
       duration: 3000,
     });
