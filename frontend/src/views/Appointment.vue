@@ -158,6 +158,21 @@ const userId = computed(() => userStore.userInfo?.id);
 const quoteImageUrl = ref<string>("");
 const quoteDescription = ref<string>("");
 onMounted(() => {
+  if (!userStore.isLoggedIn) {
+    ElMessage({
+      showClose: true,
+      message: "請先登入，登入後再服務項目！",
+      type: "warning",
+      duration: 3000,
+    });
+    router.push({
+      name: "Login",
+      query: { redirect: route.fullPath },
+    });
+    return;
+  }
+});
+onMounted(() => {
   appointmentStore.clearAll();
 });
 
