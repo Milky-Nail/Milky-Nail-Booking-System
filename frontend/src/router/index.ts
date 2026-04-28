@@ -91,7 +91,7 @@ router.beforeEach(async (to) => {
   const userStore = useUserStore();
 
   // --- 設定瀏覽器標題邏輯 ---
-  const siteName = "MilkNail";
+  const siteName = "MilkyNail";
   const pageTitle = to.meta.title as string;
   document.title = pageTitle ? `${siteName} - ${pageTitle}` : siteName;
 
