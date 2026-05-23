@@ -22,6 +22,7 @@
                 :src="work.image_url"
                 :alt="work.title"
                 class="w-full h-full object-cover rounded-2xl"
+                loading="lazy"
               />
             </div>
           </swiper-slide>

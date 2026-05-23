@@ -54,6 +54,7 @@
               :src="quote.image_url"
               alt="詢價圖片"
               class="absolute w-full h-full object-cover transition-transform duration-300 hover:scale-105 hover:cursor-pointer"
+              loading="lazy"
               @click="handleDialogOpen(quote.image_url)"
             />
             <div>
@@ -63,6 +64,7 @@
                     :src="currentImage"
                     alt="詢價圖片"
                     class="max-w-full max-h-full"
+                    loading="lazy"
                   />
                 </div>
               </el-dialog>

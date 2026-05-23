@@ -16,6 +16,7 @@
               :src="userAvatar"
               alt="avatar"
               class="w-full h-full object-cover"
+              loading="lazy"
             />
           </div>
         </div>

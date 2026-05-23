@@ -77,6 +77,7 @@
                 :src="work.image_url"
                 :alt="work.title"
                 class="w-full h-full object-cover"
+                loading="lazy"
               />
             </div>
             <p class="mt-4 text-sm font-medium text-gray-700">

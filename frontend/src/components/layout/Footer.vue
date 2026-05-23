@@ -7,6 +7,7 @@
             class="w-10 h-10 rounded-full object-cover"
             src="https://res.cloudinary.com/dsjw5wnvg/image/upload//f_auto,q_auto/v1776184355/logo_gxzpph.jpg"
             alt="logo"
+            loading="lazy"
           />
           <h4 class="text-black inline font-black text-3xl">Milky</h4>
           <h4 class="text-primary inline font-black text-3xl">Nail</h4>
@@ -21,12 +22,14 @@
             <a
               href="https://www.facebook.com/profile.php?id=61581453082012"
               target="blank"
+              aria-label="Facebook"
             >
               <font-awesome-icon :icon="['fab', 'facebook']" size="2x" />
             </a>
             <a
               href="https://www.instagram.com/milkynail_studio/"
               target="blank"
+              aria-label="Instagram"
             >
               <font-awesome-icon :icon="['fab', 'instagram']" size="2x" />
             </a>

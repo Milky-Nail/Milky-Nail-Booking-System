@@ -36,6 +36,7 @@
             <img
               :src="service.image_url"
               class="w-full h-full object-cover rounded-3xl aspect-video"
+              loading="lazy"
             />
           </template>
 

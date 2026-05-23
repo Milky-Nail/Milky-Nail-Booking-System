@@ -30,6 +30,7 @@
               :src="service.icon_url"
               alt="示意圖"
               class="w-full aspect-4/3 object-cover transition-all duration-1000 ease-out hover:scale-105"
+              loading="lazy"
             />
           </RouterLink>
         </template>

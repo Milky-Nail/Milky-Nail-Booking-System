@@ -70,6 +70,7 @@
               :src="work.image_url"
               alt="work image"
               class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+              loading="lazy"
             />
           </div>
 

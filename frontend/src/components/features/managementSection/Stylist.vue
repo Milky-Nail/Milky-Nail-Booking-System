@@ -20,6 +20,7 @@
             :src="staff.avatar_url"
             class="w-full h-32 object-cover rounded"
             alt="avatar"
+            loading="lazy"
           />
           <div
             class="text-center mt-2 font-black"

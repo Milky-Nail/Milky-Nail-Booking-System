@@ -14,7 +14,7 @@
         ]"
       >
         <template #image>
-          <img :src="staff.avatar_url" alt="美甲師照片" />
+          <img :src="staff.avatar_url" alt="美甲師照片" loading="lazy" />
         </template>
         <template #stylist-name>
           <div>{{ staff.name }}</div>

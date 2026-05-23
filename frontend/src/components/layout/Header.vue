@@ -9,6 +9,7 @@
             class="w-10 h-10 rounded-full object-cover"
             src="https://res.cloudinary.com/dsjw5wnvg/image/upload/f_auto,q_auto/v1776184355/logo_gxzpph.jpg"
             alt="logo"
+            loading="lazy"
           />
           <h2 class="text-black inline font-black text-3xl">Milky</h2>
           <h2 class="text-primary inline font-black text-3xl">Nail</h2>
@@ -46,6 +47,7 @@
                   'https://res.cloudinary.com/dsjw5wnvg/image/upload//f_auto,q_auto/v1776184355/logo_gxzpph.jpg'
                 "
                 alt="avatar"
+                loading="lazy"
               />
             </button>
 
