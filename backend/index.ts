@@ -16,6 +16,16 @@ const PORT = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    useDefaults: true,
+    directives: {
+      "img-src": ["'self'", "data:", "https:"],
+      "script-src": ["'self'", "'unsafe-inline'"],
+    },
+  })
+);
 app.use(cookieParser());
 app.use(
   cors({
@@ -27,16 +37,6 @@ app.use(express.json());
 app.use(passport.initialize());
 app.use("/api", rootRouter);
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
-app.use(helmet());
-app.use(
-  helmet.contentSecurityPolicy({
-    useDefaults: true,
-    directives: {
-      "img-src": ["'self'", "data:", "https:"],
-      "script-src": ["'self'", "'unsafe-inline'"],
-    },
-  })
-);
 app.get("/{*path}", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
