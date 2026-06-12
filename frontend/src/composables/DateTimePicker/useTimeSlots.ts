@@ -12,31 +12,47 @@ export function useTimeSlots(
     const slots = [];
     const workDate = String(currentDayFullInfo.value.work_date).split("T")[0];
 
-    // 從 ISO 字串提取 HH:mm (不理會時區，只拿數字)
-    // currentDayFullInfo.value.start_time、currentDayFullInfo.value.end_time格式為2026-03-30T09:00:00.000Z
+    // 轉換 UTC/ISO 時間為台北時間 (Asia/Taipei) 的 HH:mm 格式
     const getHHMM = (isoStr: string) => {
-      // 將2026-03-30T01:00:00.000Z從T切成兩段，[1]取後面那段
-      const timePart = String(isoStr).split("T")[1];
-      // timePart.substring(0, 5)會將字串01:00:00.000Z從第0個字元開始取（0~4）字元，在第5字元（:）之前
-      return timePart ? timePart.substring(0, 5) : "00:00";
+      try {
+        const date = new Date(isoStr);
+        const formatter = new Intl.DateTimeFormat("en-US", {
+          timeZone: "Asia/Taipei",
+          hour: "2-digit",
+          minute: "2-digit",
+          hourCycle: "h23",
+        });
+        const parts = formatter.formatToParts(date);
+        const hour = parts.find((p) => p.type === "hour")?.value || "00";
+        const minute = parts.find((p) => p.type === "minute")?.value || "00";
+        return `${hour}:${minute}`;
+      } catch (e) {
+        return "00:00";
+      }
     };
 
     const startHHMM = getHHMM(String(currentDayFullInfo.value.start_time));
     const endHHMM = getHHMM(String(currentDayFullInfo.value.end_time));
 
-    // 建立絕對的開始與結束時間的毫秒數(強制指定為台灣時間 +08:00).getTime()取絕對毫秒數
-    const startTotalMs = new Date(
-      `${workDate}T${startHHMM}:00+08:00`
-    ).getTime();
-    const endTotalMs = new Date(`${workDate}T${endHHMM}:00+08:00`).getTime();
+    const startParts = startHHMM.split(":").map(Number);
+    const endParts = endHHMM.split(":").map(Number);
 
-    const step = 30 * 60 * 1000; //每隔30分鐘一個預約點
+    const startHour = startParts[0] ?? 0;
+    const startMin = startParts[1] ?? 0;
+    const endHour = endParts[0] ?? 0;
+    const endMin = endParts[1] ?? 0;
 
-    for (let newStart = startTotalMs; newStart < endTotalMs; newStart += step) {
-      const currentSlotDate = new Date(newStart);
-      const hr = String(currentSlotDate.getHours()).padStart(2, "0");
-      const min = String(currentSlotDate.getMinutes()).padStart(2, "0");
+    const startTotalMin = startHour * 60 + startMin;
+    const endTotalMin = endHour * 60 + endMin;
+    const stepMin = 30;
+
+    for (let currentMin = startTotalMin; currentMin < endTotalMin; currentMin += stepMin) {
+      const hr = String(Math.floor(currentMin / 60)).padStart(2, "0");
+      const min = String(currentMin % 60).padStart(2, "0");
       const timeStr = `${hr}:${min}`;
+
+      // 產生該時段在台北時間的 ISO 格式毫秒數以比對已預約時間
+      const slotStartMs = new Date(`${workDate}T${timeStr}:00+08:00`).getTime();
 
       // 比對已預約清單，.some只要有一個符合就回傳
       const isBooked = (bookedAppointments.value || []).some((booked) => {
@@ -47,7 +63,7 @@ export function useTimeSlots(
         const bookedEnd = new Date(booked.end_time).getTime();
 
         //如果新的開始時間大於已被預約的開始時間且小於已被預約的結束時間，就是包含在已預約的時間段裡面
-        return newStart >= bookedStart && newStart < bookedEnd;
+        return slotStartMs >= bookedStart && slotStartMs < bookedEnd;
       });
 
       slots.push({

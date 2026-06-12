@@ -2,6 +2,26 @@ import { computed, ref, onMounted } from "vue";
 import { type Staff } from "../../api/staff";
 import { getSchedule, type Schedule } from "../../api/schedule";
 
+const formatTaipeiDate = (isoStr: string) => {
+  if (!isoStr) return "";
+  try {
+    const date = new Date(isoStr);
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Taipei",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    const parts = formatter.formatToParts(date);
+    const year = parts.find((p) => p.type === "year")?.value || "";
+    const month = parts.find((p) => p.type === "month")?.value || "";
+    const day = parts.find((p) => p.type === "day")?.value || "";
+    return `${year}-${month}-${day}`;
+  } catch (e) {
+    return "";
+  }
+};
+
 export function useStaffSchedule(stylist: Staff) {
   const scheduleList = ref<Schedule[]>([]); //綁v-model在el-date-picker
   const loading = ref(false);
@@ -23,7 +43,7 @@ export function useStaffSchedule(stylist: Staff) {
 
     const dates = scheduleList.value
       .filter((item) => item.staff_id === stylist.id)
-      .map((item) => item.work_date.split("T")[0]);
+      .map((item) => formatTaipeiDate(String(item.work_date)));
 
     return new Set(dates);
   });
@@ -47,7 +67,7 @@ export function useStaffSchedule(stylist: Staff) {
     return scheduleList.value.find(
       (item) =>
         item.staff_id === stylist.id &&
-        item.work_date.startsWith(selectedDate.value)
+        formatTaipeiDate(String(item.work_date)) === selectedDate.value
     );
   });
   return {

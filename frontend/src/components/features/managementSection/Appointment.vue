@@ -232,28 +232,46 @@ const handleSizeChange = (size: number) => {
 
 onMounted(() => fetchData());
 
+const formatTaipei = (isoStr: string | Date | undefined) => {
+  if (!isoStr) return { date: "", time: "" };
+  try {
+    const date = new Date(isoStr);
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Taipei",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    });
+    const parts = formatter.formatToParts(date);
+    const year = parts.find((p) => p.type === "year")?.value || "";
+    const month = parts.find((p) => p.type === "month")?.value || "";
+    const day = parts.find((p) => p.type === "day")?.value || "";
+    const hour = parts.find((p) => p.type === "hour")?.value || "00";
+    const minute = parts.find((p) => p.type === "minute")?.value || "00";
+    return {
+      date: `${year}-${month}-${day}`,
+      time: `${hour}:${minute}`,
+    };
+  } catch (e) {
+    return { date: "", time: "" };
+  }
+};
+
 const filteredList = computed(() => {
   if (!appointmentList.value) return [];
 
   const formattedData = appointmentList.value.map((appointment) => {
-    const start = appointment.start_time
-      ? new Date(appointment.start_time)
-      : new Date();
-    const end = appointment.end_time
-      ? new Date(appointment.end_time)
-      : new Date();
+    const localStart = formatTaipei(appointment.start_time);
+    const localEnd = formatTaipei(appointment.end_time);
 
     return {
       ...appointment,
-      date: appointment.start_time?.split("T")[0] || "",
-      startTime: `${start.getHours().toString().padStart(2, "0")}:${start
-        .getMinutes()
-        .toString()
-        .padStart(2, "0")}`,
-      endTime: `${end.getHours().toString().padStart(2, "0")}:${end
-        .getMinutes()
-        .toString()
-        .padStart(2, "0")}`,
+      date: localStart.date,
+      startTime: localStart.time,
+      endTime: localEnd.time,
 
       member: appointment.users?.name || "未知會員",
       stylist: appointment.staff?.name || "未指定",

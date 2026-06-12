@@ -165,15 +165,45 @@ onMounted(async () => {
   }
 });
 
+const formatTaipei = (isoStr: string | undefined) => {
+  if (!isoStr) return { date: "", time: "" };
+  try {
+    const date = new Date(isoStr);
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Taipei",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    });
+    const parts = formatter.formatToParts(date);
+    const year = parts.find((p) => p.type === "year")?.value || "";
+    const month = parts.find((p) => p.type === "month")?.value || "";
+    const day = parts.find((p) => p.type === "day")?.value || "";
+    const hour = parts.find((p) => p.type === "hour")?.value || "00";
+    const minute = parts.find((p) => p.type === "minute")?.value || "00";
+    return {
+      date: `${year}-${month}-${day}`,
+      time: `${hour}:${minute}`,
+    };
+  } catch (e) {
+    return { date: "", time: "" };
+  }
+};
+
 const scheduleOpen = async (staffId: number) => {
   selectedStaffId.value = staffId;
   currentStaffSchedules.value = await getSchedulesByStaff(staffId);
   filteredList.value = currentStaffSchedules.value.map((schedule) => {
+    const localStart = formatTaipei(schedule.start_time as string);
+    const localEnd = formatTaipei(schedule.end_time as string);
     return {
       staff_id: schedule.staff_id as number,
-      work_date: schedule.work_date.split("T")[0] as string,
-      start_time: schedule.start_time.split("T")[1]?.split(".")[0] as string,
-      end_time: schedule.end_time.split("T")[1]?.split(".")[0] as string,
+      work_date: localStart.date,
+      start_time: localStart.time,
+      end_time: localEnd.time,
       status: schedule.status as "active" | "cancelled",
     };
   });

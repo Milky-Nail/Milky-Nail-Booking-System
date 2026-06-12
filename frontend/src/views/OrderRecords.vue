@@ -31,12 +31,8 @@
           <div class="font-bold text-lg">
             美甲師：{{ appointment.staff.name }}
           </div>
-          <div>日期：{{ appointment.start_time.split("T")[0] }}</div>
-          <div>
-            時間：{{
-              Number(appointment.start_time.split("T")[1]?.split(":")[0]) + 8
-            }}點{{ appointment.start_time.split("T")[1]?.split(":")[1] }}分
-          </div>
+          <div>日期：{{ formatTaipei(appointment.start_time).date }}</div>
+          <div>時間：{{ formatTaipei(appointment.start_time).time }}</div>
         </div>
 
         <div class="flex flex-col gap-2">
@@ -120,6 +116,35 @@ const statusColorMap: Record<string, string> = {
   noshow: "text-red-500",
 };
 
+const formatTaipei = (isoStr: string) => {
+  if (!isoStr) return { date: "", time: "", monthStr: "" };
+  try {
+    const date = new Date(isoStr);
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Taipei",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    });
+    const parts = formatter.formatToParts(date);
+    const year = parts.find((p) => p.type === "year")?.value || "";
+    const month = parts.find((p) => p.type === "month")?.value || "";
+    const day = parts.find((p) => p.type === "day")?.value || "";
+    const hour = parts.find((p) => p.type === "hour")?.value || "00";
+    const minute = parts.find((p) => p.type === "minute")?.value || "00";
+    return {
+      date: `${year}-${month}-${day}`,
+      time: `${hour}點${minute}分`,
+      monthStr: `${year}-${month}`,
+    };
+  } catch (e) {
+    return { date: "", time: "", monthStr: "" };
+  }
+};
+
 onMounted(async () => {
   const user = userStore.userInfo;
   await appointmentStore.fetchUserAppointments(user?.id as string);
@@ -132,8 +157,8 @@ const filteredAppointments = computed(() => {
   if (!monthValue.value) return [];
 
   const filtered = appointmentList.value.filter((appointment) => {
-    const selectedDate = appointment.start_time.slice(0, 7);
-    return selectedDate === monthValue.value;
+    const localMonth = formatTaipei(appointment.start_time).monthStr;
+    return localMonth === monthValue.value;
   });
   return filtered.sort((a, b) => {
     //避免取消預約之後亂跳
