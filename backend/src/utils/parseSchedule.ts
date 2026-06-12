@@ -31,8 +31,10 @@ const toUTC = (dateStr: string, timeInput: string | Date): string | null => {
   let timePart: string = "";
 
   if (timeInput instanceof Date) {
-    const hour = timeInput.getHours().toString().padStart(2, "0");
-    const min = timeInput.getMinutes().toString().padStart(2, "0");
+    // xlsx parses time as UTC Date objects (e.g., 09:00 -> 1899-12-30T09:00:00.000Z)
+    // We MUST use getUTCHours to get the correct time regardless of the server's timezone
+    const hour = timeInput.getUTCHours().toString().padStart(2, "0");
+    const min = timeInput.getUTCMinutes().toString().padStart(2, "0");
     timePart = `${hour}:${min}`;
   } else if (typeof timeInput === "string") {
     timePart = timeInput.trim();
@@ -41,7 +43,8 @@ const toUTC = (dateStr: string, timeInput: string | Date): string | null => {
   if (!timePart) return null;
 
   const combined = dayjs.tz(`${dateStr} ${timePart}`, "Asia/Taipei");
-  return `${combined.format("YYYY-MM-DDTHH:mm:ss")}.000Z`;
+  // toISOString automatically converts the Taipei time to UTC correctly (e.g. 09:00 Taipei -> 01:00 UTC)
+  return combined.toISOString();
 };
 
 export function parseScheduleExcel(buffer: Buffer) {
@@ -84,7 +87,9 @@ export function parseScheduleExcel(buffer: Buffer) {
 
     let parsedDate: string = "";
     if (workDate instanceof Date) {
-      parsedDate = dayjs(workDate).format("YYYY-MM-DD");
+      // xlsx creates Date objects in UTC. Using dayjs.utc prevents timezone shifts
+      // where 2024-05-01T00:00:00Z in a UTC-8 server becomes 2024-04-30
+      parsedDate = dayjs.utc(workDate).format("YYYY-MM-DD");
     } else {
       parsedDate = dayjs(String(workDate)).format("YYYY-MM-DD");
     }

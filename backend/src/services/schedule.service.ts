@@ -34,7 +34,18 @@ const SchedulesService = {
     });
   },
   async batchSaveSchedules(fileBuffer: Buffer) {
-    const { records, errors } = parseScheduleExcel(fileBuffer);
+    let parseResult;
+    try {
+      parseResult = parseScheduleExcel(fileBuffer);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "未知的解析錯誤";
+      return {
+        success: false,
+        records: [],
+        errors: [{ row: 0, message: `Excel 檔案解析失敗: ${message}` }],
+      };
+    }
+    const { records, errors } = parseResult;
     //有錯誤提早回傳，避免髒資料寫入資料庫
     if (errors.length > 0) {
       return { success: false, records: [], errors };
