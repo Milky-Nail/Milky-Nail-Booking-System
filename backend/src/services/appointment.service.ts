@@ -290,14 +290,13 @@ const AppointmentService = {
       if (conflict) throw new Error("該時段美甲師已被預約");
       // 檢查美甲師時間是否真的可以
 
-      const offsetMs = 8 * 60 * 60 * 1000;
       const isAvailable = await tx.schedules.findFirst({
         where: {
           staff_id: Number(data.staff_id),
           start_time: {
-            lte: new Date(new Date(startDate).getTime() + offsetMs),
+            lte: startDate,
           },
-          end_time: { gte: new Date(new Date(endDate).getTime() + offsetMs) },
+          end_time: { gte: endDate },
           status: "active",
         },
       });
