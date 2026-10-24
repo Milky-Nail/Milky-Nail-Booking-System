@@ -9,10 +9,10 @@
       >
         <el-card>
           <template #header>
-            <div>會員名稱：{{ quote.users.name }}</div>
-            <div>日期：{{ quote.appointments.start_time }}</div>
-            <div>選擇美甲師：{{ stylistMap[quote.staff_id] }}</div>
-            <div>款式敘述：{{ quote.description }}</div>
+            <div>會員名稱：{{ quote.users?.name || '未知顧客' }}</div>
+            <div>日期：{{ quote.appointments?.start_time || '無關聯預約' }}</div>
+            <div>選擇美甲師：{{ stylistMap[quote.staff_id] || '未指定' }}</div>
+            <div>款式敘述：{{ quote.description || '無' }}</div>
 
             <div class="flex mt-2">
               <span
@@ -29,6 +29,7 @@
                 @change="(newStatus:string) => handleStatusChange(quote.appointment_id, newStatus)"
                 :class="statusMap[quote.status]?.color"
                 :disabled="
+                  !quote.appointments ||
                   !['pending', 'confirmed'].includes(quote.appointments.status)
                 "
               >
@@ -158,21 +159,26 @@ const statusMap: Record<
 const fetchQuoteData = async () => {
   try {
     const res = await getQuoteRequest(currentPage.value, pageSize.value);
-    recentQuoteRequest.value = res;
-    recentQuoteRequest.value.data.map((quote) => {
-      quote.appointments.start_time = new Date(
-        quote.appointments.start_time
-      ).toLocaleString("zh-TW", {
-        timeZone: "Asia/Taipei",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
+    if (res?.data) {
+      res.data.forEach((quote) => {
+        if (quote.appointments?.start_time) {
+          quote.appointments.start_time = new Date(
+            quote.appointments.start_time
+          ).toLocaleString("zh-TW", {
+            timeZone: "Asia/Taipei",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        }
       });
-    });
-    totalCount.value = res.totalCount;
+    }
+    recentQuoteRequest.value = res;
+    totalCount.value = res?.totalCount || 0;
   } catch (err) {
+    console.error("載入資料失敗:", err);
     ElMessage.error("載入資料失敗");
   }
 };
@@ -184,13 +190,17 @@ const handleDialogOpen = (imageUrl: string) => {
   currentImage.value = imageUrl;
 };
 
-const handleStatusChange = async (id: number, newStatus: string) => {
+const handleStatusChange = async (
+  id: number | string | null | undefined,
+  newStatus: string
+) => {
+  if (!id) {
+    ElMessage.warning("此詢價未關聯有效預約，無法更改預約狀態");
+    return;
+  }
   try {
-    await adminChangeStatus(id, newStatus);
-    ElMessage.success({
-      message: `狀態已成功更新為：${statusMap[newStatus]?.label}`,
-      type: "success",
-    });
+    await adminChangeStatus(Number(id), newStatus);
+    ElMessage.success(`狀態已成功更新為：${statusMap[newStatus]?.label}`);
     await fetchQuoteData();
   } catch (error) {
     ElMessage.error("更新失敗，請稍後再試");
@@ -199,14 +209,32 @@ const handleStatusChange = async (id: number, newStatus: string) => {
 };
 
 const replyQuote = async (
-  appointmentId: number,
-  id: number,
+  appointmentId: number | string | null | undefined,
+  id: number | string,
   staffReply: string,
   price: number
 ) => {
-  await handleStatusChange(appointmentId, "confirmed");
-  await updateQuoteRequest(id, staffReply, price);
-  await fetchQuoteData();
+  if (!price || Number(price) <= 0) {
+    ElMessage.warning("請輸入大於0的有效價格");
+    return;
+  }
+  if (!staffReply || !staffReply.trim()) {
+    ElMessage.warning("請輸入回傳訊息內容");
+    return;
+  }
+
+  try {
+    if (appointmentId) {
+      await adminChangeStatus(Number(appointmentId), "confirmed");
+    }
+    await updateQuoteRequest(id, staffReply, price);
+    ElMessage.success("報價與狀態已成功送出！");
+    await fetchQuoteData();
+  } catch (error) {
+    console.error("回覆詢價失敗:", error);
+    ElMessage.error("回覆失敗，請稍後再試");
+    await fetchQuoteData();
+  }
 };
 const handlePageChange = (page: number) => {
   currentPage.value = page;

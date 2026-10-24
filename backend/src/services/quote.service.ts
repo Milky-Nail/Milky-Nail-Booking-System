@@ -42,9 +42,18 @@ const QuoteRequestService = {
     }
   },
 
-  async updatequoteRequest(id: number, staffReply: string, price: number) {
+  async updatequoteRequest(id: number | string, staffReply: string, price: number) {
+    if (!id || !staffReply || !staffReply.trim() || price === undefined || price === null) {
+      throw new Error("缺少必要參數");
+    }
+    const numericPrice = Number(price);
+    if (isNaN(numericPrice) || numericPrice <= 0) {
+      throw new Error("價格必須大於0元");
+    }
+    const quoteId = BigInt(id);
+
     const currQuote = await prisma.quote_requests.findUnique({
-      where: { id },
+      where: { id: quoteId },
       include: {
         appointments: {
           select: {
@@ -64,33 +73,39 @@ const QuoteRequestService = {
         },
       },
     });
+
+    if (!currQuote) {
+      throw new Error("找不到該詢價紀錄");
+    }
+
     const lineId = currQuote?.users?.line_id as string;
-    const numericPrice = Number(price); //所有的 URL 參數在後端解析時預設都是字串
-    if (!id || !staffReply.trim() || !price) {
-      throw new Error("缺少必要參數");
-    }
-    if (typeof numericPrice !== "number" || price <= 0) {
-      throw new Error("價格必須大於0元");
-    }
     try {
-      const updatedData = await prisma.quote_requests.update({
-        where: { id },
-        data: {
-          staff_reply: staffReply.trim(),
-          quoted_price: numericPrice,
-          replied_at: new Date(),
-          appointments: {
-            update: {
-              total_price: numericPrice,
-            },
+      const updateData: any = {
+        staff_reply: staffReply.trim(),
+        quoted_price: numericPrice,
+        replied_at: new Date(),
+        status: "confirmed",
+      };
+
+      if (currQuote.appointment_id) {
+        updateData.appointments = {
+          update: {
+            total_price: numericPrice,
           },
-        },
+        };
+      }
+
+      const updatedData = await prisma.quote_requests.update({
+        where: { id: quoteId },
+        data: updateData,
       });
 
-      pushQuoteNotification(lineId, {
-        ...currQuote,
-        ...updatedData,
-      } as unknown as QuoteRequest);
+      if (lineId) {
+        pushQuoteNotification(lineId, {
+          ...currQuote,
+          ...updatedData,
+        } as unknown as QuoteRequest);
+      }
 
       return updatedData;
     } catch (err) {

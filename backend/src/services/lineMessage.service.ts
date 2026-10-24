@@ -155,13 +155,17 @@ export const pushQuoteNotification = async (
   quote: QuoteRequest
 ) => {
   if (!lineId) return;
-  const d = new Date(quote.appointments.start_time);
-  const twTime = new Date(d.getTime() + 8 * 60 * 60 * 1000);
-  const formattedTime = `${twTime.getUTCFullYear()}/${String(
-    twTime.getUTCMonth() + 1
-  ).padStart(2, "0")}/${String(twTime.getUTCDate()).padStart(2, "0")} ${String(
-    twTime.getUTCHours()
-  ).padStart(2, "0")}:${String(twTime.getUTCMinutes()).padStart(2, "0")}`;
+  const d = quote.appointments?.start_time
+    ? new Date(quote.appointments.start_time)
+    : null;
+  const twTime = d ? new Date(d.getTime() + 8 * 60 * 60 * 1000) : null;
+  const formattedTime = twTime
+    ? `${twTime.getUTCFullYear()}/${String(
+        twTime.getUTCMonth() + 1
+      ).padStart(2, "0")}/${String(twTime.getUTCDate()).padStart(2, "0")} ${String(
+        twTime.getUTCHours()
+      ).padStart(2, "0")}:${String(twTime.getUTCMinutes()).padStart(2, "0")}`
+    : "無預約時間";
   const flexContainer: any = {
     type: "bubble",
     body: {
@@ -170,7 +174,7 @@ export const pushQuoteNotification = async (
       contents: [
         {
           type: "text",
-          text: `親愛的${quote.users.name}，您好！`,
+          text: `親愛的${quote.users?.name || "顧客"}，您好！`,
           weight: "bold",
           size: "lg",
           color: "#EB5A8B",

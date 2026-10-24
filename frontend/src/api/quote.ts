@@ -10,15 +10,15 @@ interface Appointment {
 }
 interface User {
   name: string;
-  line_id: true;
+  line_id?: string;
 }
 export interface QuoteRequest {
-  appointments: Appointment;
-  appointment_id: number;
-  users: User;
-  id: number;
+  appointments?: Appointment | null;
+  appointment_id?: number | string | null;
+  users?: User | null;
+  id: number | string;
   created_at: Date;
-  user_id: number;
+  user_id?: number | string | null;
   staff_id: number;
   status: "pending" | "confirmed" | "completed" | "cancelled" | "noshow";
   staff_reply: string;
@@ -46,7 +46,7 @@ const getQuoteRequest = async (
   }
 };
 const updateQuoteRequest = async (
-  id: number,
+  id: number | string,
   staffReply: string,
   price: number
 ) => {
