@@ -31,7 +31,9 @@ import { gsap } from "gsap";
 const userStore = useUserStore();
 
 onMounted(() => {
-  userStore.fetchUserProfile();
+  if (!userStore.isInitialized) {
+    userStore.fetchUserProfile();
+  }
 });
 
 const onEnter = (el: Element, done: () => void): void => {

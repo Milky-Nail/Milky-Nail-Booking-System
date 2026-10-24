@@ -18,7 +18,11 @@ export const useUserStore = defineStore("user", () => {
 
   const fetchUserProfile = async () => {
     const loggedIn = localStorage.getItem("is_logged_in");
-    if (!loggedIn) return;
+    if (!loggedIn) {
+      userInfo.value = null;
+      isInitialized.value = true;
+      return;
+    }
     try {
       const data = await getUserProfile();
       userInfo.value = data as unknown as UserInfo;
@@ -95,4 +99,7 @@ export const useUserStore = defineStore("user", () => {
     logout,
     updateProfile,
   };
+},
+{
+  persist: true,
 });

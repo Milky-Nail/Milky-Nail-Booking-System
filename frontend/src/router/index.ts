@@ -12,6 +12,7 @@ import Member from "../views/Member.vue";
 import OrderRecords from "../views/OrderRecords.vue";
 import Management from "../views/Management.vue";
 import { useUserStore } from "../stores/user";
+import { ElMessage } from "element-plus";
 
 const routes = [
   {
@@ -90,6 +91,11 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const userStore = useUserStore();
 
+  // 若尚未向後端驗證過身份，先等待取得使用者最新資料
+  if (!userStore.isInitialized) {
+    await userStore.fetchUserProfile();
+  }
+
   // --- 設定瀏覽器標題邏輯 ---
   const siteName = "MilkyNail";
   const pageTitle = to.meta.title as string;
@@ -106,12 +112,12 @@ router.beforeEach(async (to) => {
     if (userStore.isLoggedIn && userStore.userInfo?.role === "admin") {
       return true;
     } else {
-      alert("權限不足或請先登入");
+      ElMessage.error("權限不足或請先登入");
       return userStore.isLoggedIn ? { name: "Home" } : { name: "Login" };
     }
     // 會員
   } else if (to.meta.requiresAuth && !userStore.isLoggedIn) {
-    alert("請先登入帳號");
+    ElMessage.warning("請先登入帳號");
     return { name: "Login" };
   } else {
     return true;

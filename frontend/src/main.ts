@@ -19,8 +19,9 @@ library.add(faFacebook, faInstagram, faGoogle, faLine);
 
 const app = createApp(App);
 const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
+app.use(pinia);
 app.use(router);
-app.use(pinia.use(piniaPluginPersistedstate));
 app.use(
   createGtm({
     id: "GTM-TVR2XZPZ",
