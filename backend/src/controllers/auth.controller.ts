@@ -80,6 +80,7 @@ const googleCallback = [
     failureRedirect: `/login-failed`,
   }),
   (req: Request, res: Response) => {
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, private");
     const user = req.user as users;
     const token = authService.generateAppToken(user.id, user.role);
 
