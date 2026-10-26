@@ -17,22 +17,19 @@ export const useUserStore = defineStore("user", () => {
   const isLoggedIn = computed(() => !!userInfo.value);
 
   const fetchUserProfile = async () => {
-    const loggedIn = localStorage.getItem("is_logged_in");
-    if (!loggedIn) {
-      userInfo.value = null;
-      isInitialized.value = true;
-      return;
+    // 清除舊版本 persist 插件可能殘留的 poisoned state
+    if (localStorage.getItem("user")) {
+      localStorage.removeItem("user");
     }
+
     try {
       const data = await getUserProfile();
       userInfo.value = data as unknown as UserInfo;
       localStorage.setItem("is_logged_in", "true");
     } catch (error) {
       userInfo.value = null;
-      // 回傳401為Token過期，把標記清掉
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        localStorage.removeItem("is_logged_in");
-      }
+      // 回傳401為未登入或Token過期，把標記清掉
+      localStorage.removeItem("is_logged_in");
     } finally {
       isInitialized.value = true;
     }
@@ -99,7 +96,4 @@ export const useUserStore = defineStore("user", () => {
     logout,
     updateProfile,
   };
-},
-{
-  persist: true,
 });

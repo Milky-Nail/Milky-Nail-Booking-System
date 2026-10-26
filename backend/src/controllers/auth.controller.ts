@@ -60,6 +60,7 @@ const lineCallback = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
       secure: process.env.NODE_ENV !== "development",
       sameSite: "lax",
+      path: "/",
     });
     res.redirect(`/`);
   } catch (err) {
@@ -89,6 +90,7 @@ const googleCallback = [
       maxAge: 7 * 24 * 60 * 60 * 1000,
       secure: process.env.NODE_ENV !== "development",
       sameSite: "lax",
+      path: "/",
     });
     res.redirect(`/`);
   },
